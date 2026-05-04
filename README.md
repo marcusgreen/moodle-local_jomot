@@ -1,40 +1,26 @@
-# Just One More Thing (`local_jomot`)
+# Just One More Thing
 
-A Moodle 5.x local plugin that automatically generates a quiz from an assignment submission using AI.
+## Benefit
 
-## What it does
+When a student submits an assignment, the plugin automatically builds a quiz tailored to their work and puts it in the course. It uses the AIText question type which gives feedback and marks on free text responses.
 
-- Adds a **Generate quiz from assignment** checkbox to every assignment's settings form.
-- When a student finalises a submission to an enabled assignment, an adhoc task is queued that creates a `mod_quiz` activity in the same course, named after the submitting student.
-- Exposes a **web service** (`local_jomot_create_quiz`) so the same quiz-creation logic can be driven externally — for example, from a mobile app or an AI pipeline.
+- Each quiz reflects the individual student's own work, not a generic template
+- Works in the background — quizzes appear after the next cron run without any intervention
+- Quizzes are named after each student that has made a submission.
+- Quiz can only be taken by the student it is named after.
+
+## Quick Start (Teachers)
+
+1. Open any assignment → **Edit settings**
+2. Find the **Just One More Thing** section (bottom of form) → enable **Generate quiz from assignment** → Save
+3. Once a student submits, their personalised quiz appears automatically in the course
 
 ## Requirements
 
-- Moodle 5.0+ (requires `2025041400`)
-- PHP 8.x
-
-## Installation
-
-1. Copy the `jomot/` directory into `<moodleroot>/local/`.
-2. Log in as admin and navigate to **Site administration → Notifications**.
-3. Complete the upgrade to create the database table, register the capability, and activate the web service.
-
-## Usage
-
-1. Edit an assignment and enable the **Generate quiz from assignment** checkbox under the **Just One More Thing** section, then save.
-2. A student submits the assignment.
-3. Run cron (`php admin/cli/cron.php`) — a quiz named after the student will appear in the course.
-
-## Web service
-
-The `local_jomot_create_quiz` external function creates a `mod_quiz` activity programmatically. Callers must hold `local/jomot:createquiz` and `moodle/course:manageactivities` in the target course context.
-
-## Running tests
-
-```bash
-php admin/tool/phpunit/cli/init.php
-php vendor/bin/phpunit --testsuite local_jomot_testsuite
-```
+- Moodle 5.0 or later
+- AIText question type
+- Connection to an external LLM must be enabled
+- Admin installs the plugin once via **Site administration → Notifications**
 
 ## License
 
