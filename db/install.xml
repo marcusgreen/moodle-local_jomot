@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<XMLDB PATH="local/jomot/db" VERSION="20260501" COMMENT="XMLDB file for local_jomot"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
+>
+  <TABLES>
+    <TABLE NAME="local_jomot_assign_config" COMMENT="Stores Just One More Thing settings per assignment">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="assignmentid" TYPE="int" LENGTH="10" NOTNULL="true" COMMENT="ID of the assignment instance"/>
+        <FIELD NAME="enable_quiz" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" COMMENT="Whether to generate a quiz from this assignment"/>
+        <FIELD NAME="numquestions" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="5" COMMENT="Number of questions to generate"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="assignmentid" TYPE="unique" FIELDS="assignmentid"/>
+      </KEYS>
+    </TABLE>
+  </TABLES>
+</XMLDB>
