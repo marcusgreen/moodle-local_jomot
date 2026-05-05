@@ -10,6 +10,8 @@
         <FIELD NAME="assignmentid" TYPE="int" LENGTH="10" NOTNULL="true" COMMENT="ID of the assignment instance"/>
         <FIELD NAME="enable_quiz" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" COMMENT="Whether to generate a quiz from this assignment"/>
         <FIELD NAME="numquestions" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="5" COMMENT="Number of questions to generate"/>
+        <FIELD NAME="quizvisible" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" COMMENT="Whether generated quizzes are visible to students immediately"/>
+        <FIELD NAME="prompt" TYPE="text" NOTNULL="false" COMMENT="Additional prompt appended to the default AI prompt"/>
         <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
         <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
       </FIELDS>

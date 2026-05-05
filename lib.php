@@ -52,6 +52,20 @@ function local_jomot_coursemodule_standard_elements($formwrapper, $mform) {
     $mform->setDefault('local_jomot_numquestions', \local_jomot\constants::DEFAULT_NUMQUESTIONS);
     $mform->hideIf('local_jomot_numquestions', 'local_jomot_enable_quiz', 'eq', 0);
 
+    $mform->addElement('advcheckbox', 'local_jomot_quizvisible',
+        get_string('quizvisible_label', 'local_jomot'),
+        get_string('quizvisible_desc', 'local_jomot'),
+        ['group' => 1], [0, 1]);
+    $mform->setDefault('local_jomot_quizvisible', 0);
+    $mform->addHelpButton('local_jomot_quizvisible', 'quizvisible', 'local_jomot');
+    $mform->hideIf('local_jomot_quizvisible', 'local_jomot_enable_quiz', 'eq', 0);
+
+    $mform->addElement('textarea', 'local_jomot_prompt',
+        get_string('prompt_label', 'local_jomot'), ['rows' => 4, 'cols' => 50]);
+    $mform->setType('local_jomot_prompt', PARAM_TEXT);
+    $mform->addHelpButton('local_jomot_prompt', 'prompt', 'local_jomot');
+    $mform->hideIf('local_jomot_prompt', 'local_jomot_enable_quiz', 'eq', 0);
+
     // Override defaults with saved values when editing an existing assignment.
     $update = optional_param('update', 0, PARAM_INT);
     if ($update) {
@@ -61,6 +75,8 @@ function local_jomot_coursemodule_standard_elements($formwrapper, $mform) {
             if ($config) {
                 $mform->setDefault('local_jomot_enable_quiz', (int)$config->enable_quiz);
                 $mform->setDefault('local_jomot_numquestions', max(1, (int)$config->numquestions ?: \local_jomot\constants::DEFAULT_NUMQUESTIONS));
+                $mform->setDefault('local_jomot_quizvisible', (int)$config->quizvisible);
+                $mform->setDefault('local_jomot_prompt', $config->prompt ?? '');
             }
         }
     }
@@ -85,12 +101,16 @@ function local_jomot_coursemodule_edit_post_actions($data, $course) {
         \local_jomot\constants::MAX_NUMQUESTIONS,
         max(1, isset($data->local_jomot_numquestions) ? (int)$data->local_jomot_numquestions : \local_jomot\constants::DEFAULT_NUMQUESTIONS)
     );
+    $quizvisible = isset($data->local_jomot_quizvisible) ? (int)$data->local_jomot_quizvisible : 0;
+    $prompt      = isset($data->local_jomot_prompt) ? clean_param($data->local_jomot_prompt, PARAM_TEXT) : '';
 
     $existing = $DB->get_record('local_jomot_assign_config', ['assignmentid' => $data->instance]);
 
     if ($existing) {
         $existing->enable_quiz   = $enablequiz;
-        $existing->numquestions = $numquestions;
+        $existing->numquestions  = $numquestions;
+        $existing->quizvisible   = $quizvisible;
+        $existing->prompt        = $prompt;
         $existing->timemodified  = time();
         $DB->update_record('local_jomot_assign_config', $existing);
     } else {
@@ -98,6 +118,8 @@ function local_jomot_coursemodule_edit_post_actions($data, $course) {
             'assignmentid' => $data->instance,
             'enable_quiz'  => $enablequiz,
             'numquestions' => $numquestions,
+            'quizvisible'  => $quizvisible,
+            'prompt'       => $prompt,
             'timecreated'  => time(),
             'timemodified' => time(),
         ]);
