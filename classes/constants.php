@@ -30,4 +30,7 @@ class constants {
 
     /** Maximum number of questions allowed per submission. */
     const MAX_NUMQUESTIONS = 50;
+
+    /** Default number of questions per quiz page (0 = all on one page). */
+    const DEFAULT_QUESTIONSPERPAGE = 1;
 }

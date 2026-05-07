@@ -56,7 +56,7 @@ class create_quiz_adhoc extends \core\task\adhoc_task {
         \local_jomot\external\create_quiz::create(
             (int) $data->courseid,
             $name,
-            [],
+            ['questionsperpage' => \local_jomot\constants::DEFAULT_QUESTIONSPERPAGE],
             $data->submissiontext ?? '',
             (int) ($data->numquestions ?? \local_jomot\constants::DEFAULT_NUMQUESTIONS)
         );

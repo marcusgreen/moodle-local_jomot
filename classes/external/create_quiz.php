@@ -100,7 +100,7 @@ class create_quiz extends external_api {
                 PARAM_INT,
                 'Questions per page (0 = all on one page)',
                 VALUE_DEFAULT,
-                0
+                constants::DEFAULT_QUESTIONSPERPAGE
             ),
             'shuffleanswers' => new external_value(
                 PARAM_INT,
@@ -179,7 +179,7 @@ class create_quiz extends external_api {
         int $timelimit = 0,
         float $grade = 10.0,
         int $attempts = 0,
-        int $questionsperpage = 0,
+        int $questionsperpage = constants::DEFAULT_QUESTIONSPERPAGE,
         int $shuffleanswers = 1,
         string $preferredbehaviour = 'deferredfeedback',
         int $visible = 0,
@@ -259,7 +259,7 @@ class create_quiz extends external_api {
             'timelimit'          => 0,
             'grade'              => 10.0,
             'attempts'           => 0,
-            'questionsperpage'   => 0,
+            'questionsperpage'   => constants::DEFAULT_QUESTIONSPERPAGE,
             'shuffleanswers'     => 1,
             'preferredbehaviour' => 'deferredfeedback',
             'visible'            => 0,
