@@ -43,4 +43,12 @@ if ($hassiteconfig) {
         get_string('default_ai_prompt_desc', 'local_jomot'),
         $defaultprompt
     ));
+
+    $settings->add(new admin_setting_configtext(
+        'local_jomot/templatetag',
+        get_string('templatetag', 'local_jomot'),
+        get_string('templatetag_desc', 'local_jomot'),
+        '',
+        PARAM_TEXT
+    ));
 }

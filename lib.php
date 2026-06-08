@@ -66,6 +66,15 @@ function local_jomot_coursemodule_standard_elements($formwrapper, $mform) {
     $mform->addHelpButton('local_jomot_prompt', 'prompt', 'local_jomot');
     $mform->hideIf('local_jomot_prompt', 'local_jomot_enable_quiz', 'eq', 0);
 
+    $quizoptions = [0 => get_string('templatequiz_none', 'local_jomot')]
+        + local_jomot_get_template_quizzes((int)$formwrapper->get_course()->id);
+    $mform->addElement('select', 'local_jomot_templatequiz',
+        get_string('templatequiz_label', 'local_jomot'), $quizoptions);
+    $mform->setType('local_jomot_templatequiz', PARAM_INT);
+    $mform->setDefault('local_jomot_templatequiz', 0);
+    $mform->addHelpButton('local_jomot_templatequiz', 'templatequiz', 'local_jomot');
+    $mform->hideIf('local_jomot_templatequiz', 'local_jomot_enable_quiz', 'eq', 0);
+
     // Override defaults with saved values when editing an existing assignment.
     $update = optional_param('update', 0, PARAM_INT);
     if ($update) {
@@ -77,9 +86,61 @@ function local_jomot_coursemodule_standard_elements($formwrapper, $mform) {
                 $mform->setDefault('local_jomot_numquestions', max(1, (int)$config->numquestions ?: \local_jomot\constants::DEFAULT_NUMQUESTIONS));
                 $mform->setDefault('local_jomot_quizvisible', (int)$config->quizvisible);
                 $mform->setDefault('local_jomot_prompt', $config->prompt ?? '');
+                $mform->setDefault('local_jomot_templatequiz', (int)($config->templatequiz ?? 0));
             }
         }
     }
+}
+
+/**
+ * Returns quizzes in a course usable as generation templates, keyed by quiz id.
+ *
+ * When the admin 'templatetag' setting is non-empty, only quizzes whose activity
+ * carries that tag are returned; otherwise every quiz in the course is listed.
+ *
+ * @param int $courseid
+ * @return array<int, string> Quiz id => quiz name.
+ */
+function local_jomot_get_template_quizzes(int $courseid): array {
+    global $DB;
+
+    if (!$courseid) {
+        return [];
+    }
+
+    $params   = ['courseid' => $courseid];
+    $tagjoin  = '';
+    $tagwhere = '';
+
+    $templatetag = trim((string) get_config('local_jomot', 'templatetag'));
+    if ($templatetag !== '') {
+        $tagjoin = "
+              JOIN {tag_instance} ti ON ti.itemid = cm.id
+                                    AND ti.component = 'core'
+                                    AND ti.itemtype = 'course_modules'
+              JOIN {tag} t ON t.id = ti.tagid";
+        $tagwhere = ' AND ' . $DB->sql_like('t.rawname', ':templatetag', false);
+        $params['templatetag'] = $DB->sql_like_escape($templatetag);
+    }
+
+    $quizzes = $DB->get_records_sql("
+        SELECT q.id, q.name
+          FROM {quiz} q
+          JOIN {course_modules} cm ON cm.instance = q.id
+          JOIN {modules} m ON m.id = cm.module
+          $tagjoin
+         WHERE q.course = :courseid
+           AND m.name = 'quiz'
+           AND cm.deletioninprogress = 0
+           $tagwhere
+      ORDER BY q.name", $params);
+
+    $options = [];
+    foreach ($quizzes as $q) {
+        $options[$q->id] = format_string($q->name);
+    }
+
+    return $options;
 }
 
 /**
@@ -103,6 +164,7 @@ function local_jomot_coursemodule_edit_post_actions($data, $course) {
     );
     $quizvisible = isset($data->local_jomot_quizvisible) ? (int)$data->local_jomot_quizvisible : 0;
     $prompt      = isset($data->local_jomot_prompt) ? clean_param($data->local_jomot_prompt, PARAM_TEXT) : '';
+    $templatequiz = isset($data->local_jomot_templatequiz) ? (int)$data->local_jomot_templatequiz : 0;
 
     $existing = $DB->get_record('local_jomot_assign_config', ['assignmentid' => $data->instance]);
 
@@ -111,6 +173,7 @@ function local_jomot_coursemodule_edit_post_actions($data, $course) {
         $existing->numquestions  = $numquestions;
         $existing->quizvisible   = $quizvisible;
         $existing->prompt        = $prompt;
+        $existing->templatequiz  = $templatequiz;
         $existing->timemodified  = time();
         $DB->update_record('local_jomot_assign_config', $existing);
     } else {
@@ -120,6 +183,7 @@ function local_jomot_coursemodule_edit_post_actions($data, $course) {
             'numquestions' => $numquestions,
             'quizvisible'  => $quizvisible,
             'prompt'       => $prompt,
+            'templatequiz' => $templatequiz,
             'timecreated'  => time(),
             'timemodified' => time(),
         ]);

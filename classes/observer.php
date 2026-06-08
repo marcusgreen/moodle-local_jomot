@@ -64,6 +64,8 @@ class observer {
             'assignmentname' => $cm->name,
             'submissiontext' => $submissiontext,
             'numquestions'   => max(1, (int) $config->numquestions ?: constants::DEFAULT_NUMQUESTIONS),
+            'templatequiz'   => (int) ($config->templatequiz ?? 0),
+            'quizvisible'    => (int) ($config->quizvisible ?? 0),
         ]);
         \core\task\manager::queue_adhoc_task($task);
     }

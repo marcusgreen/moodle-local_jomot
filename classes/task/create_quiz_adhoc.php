@@ -49,14 +49,18 @@ class create_quiz_adhoc extends \core\task\adhoc_task {
         $data = $this->get_custom_data();
 
         $user = $DB->get_record('user', ['id' => $data->userid], '*', MUST_EXIST);
-        $name = strtolower($user->firstname) . '-' . strtolower($user->lastname) . '_' . $data->assignmentname;
 
-        mtrace("local_jomot: creating quiz '$name' in course {$data->courseid}");
+        mtrace("local_jomot: creating quiz for '{$user->email}' in course {$data->courseid}");
 
         \local_jomot\external\create_quiz::create(
             (int) $data->courseid,
-            $name,
-            ['questionsperpage' => \local_jomot\constants::DEFAULT_QUESTIONSPERPAGE],
+            $data->assignmentname,
+            [
+                'questionsperpage' => \local_jomot\constants::DEFAULT_QUESTIONSPERPAGE,
+                'templatequiz'     => (int) ($data->templatequiz ?? 0),
+                'useremail'        => $user->email,
+                'visible'          => (int) ($data->quizvisible ?? 0),
+            ],
             $data->submissiontext ?? '',
             (int) ($data->numquestions ?? \local_jomot\constants::DEFAULT_NUMQUESTIONS)
         );

@@ -206,6 +206,242 @@ final class create_quiz_test extends advanced_testcase {
     }
 
     /**
+     * Passing a useremail restricts the quiz to that user's profile email and
+     * hides it from everyone else.
+     */
+    public function test_create_quiz_restricted_to_user_email(): void {
+        global $DB;
+
+        $student = $this->getDataGenerator()->create_user([
+            'firstname' => 'Jo',
+            'lastname'  => 'Student',
+            'email'     => 'jo.student@example.com',
+        ]);
+
+        $result = create_quiz::create(
+            $this->course->id,
+            'Assignment One',
+            ['useremail' => $student->email]
+        );
+
+        $cm = $DB->get_record('course_modules', ['id' => $result['cmid']], '*', MUST_EXIST);
+        $this->assertNotEmpty($cm->availability, 'availability JSON should be set');
+
+        $tree = json_decode($cm->availability, true);
+        $this->assertSame('&', $tree['op']);
+        $this->assertSame([false], $tree['showc'], 'restriction should be hidden from others');
+
+        $condition = $tree['c'][0];
+        $this->assertSame('profile', $condition['type']);
+        $this->assertSame('email', $condition['sf']);
+        $this->assertSame('isequalto', $condition['op']);
+        $this->assertSame($student->email, $condition['v']);
+
+        // Name is prefixed once with the student's name.
+        $this->assertSame('jo-student_Assignment One', $result['name']);
+    }
+
+    /**
+     * Without a useremail the quiz has no availability restriction.
+     */
+    public function test_create_quiz_no_email_no_restriction(): void {
+        global $DB;
+
+        $result = create_quiz::create($this->course->id, 'Open Quiz');
+
+        $cm = $DB->get_record('course_modules', ['id' => $result['cmid']], '*', MUST_EXIST);
+        $this->assertEmpty($cm->availability, 'availability should be unset when no useremail given');
+    }
+
+    /**
+     * The adhoc task created from a submission restricts the quiz to the
+     * submitting student's email.
+     */
+    public function test_adhoc_task_restricts_to_submitter(): void {
+        global $DB;
+
+        $student = $this->getDataGenerator()->create_user([
+            'firstname' => 'Sam',
+            'lastname'  => 'Jones',
+            'email'     => 'sam.jones@example.com',
+        ]);
+
+        $task = new \local_jomot\task\create_quiz_adhoc();
+        $task->set_custom_data([
+            'courseid'       => $this->course->id,
+            'userid'         => $student->id,
+            'assignmentname' => 'Essay',
+            'submissiontext' => '',
+            'numquestions'   => 1,
+            'templatequiz'   => 0,
+        ]);
+
+        // The task calls mtrace(); capture it so the test is not flagged risky.
+        ob_start();
+        $task->execute();
+        ob_end_clean();
+
+        $quiz = $DB->get_record('quiz', ['name' => 'sam-jones_Essay'], '*', MUST_EXIST);
+        $cm   = get_coursemodule_from_instance('quiz', $quiz->id, $this->course->id, false, MUST_EXIST);
+
+        $tree = json_decode($cm->availability, true);
+        $this->assertSame('email', $tree['c'][0]['sf']);
+        $this->assertSame($student->email, $tree['c'][0]['v']);
+    }
+
+    /**
+     * Full path: a real assignment submission fires the observer, which queues the
+     * adhoc task, which creates a quiz locked to the submitting student's email.
+     *
+     * This exercises the whole chain (event -> observer -> adhoc task -> create_quiz)
+     * rather than calling create_quiz::create() directly, proving the generated quiz
+     * is access-restricted to exactly the student who submitted.
+     */
+    public function test_submission_creates_quiz_restricted_to_submitter_email(): void {
+        global $DB;
+
+        $generator = $this->getDataGenerator();
+
+        // Student who will submit the assignment.
+        $student = $generator->create_user([
+            'firstname' => 'Pat',
+            'lastname'  => 'Lee',
+            'email'     => 'pat.lee@example.com',
+        ]);
+        $generator->enrol_user($student->id, $this->course->id, 'student');
+
+        // Assignment configured for Just One More Thing quiz generation.
+        $assign = $generator->create_module('assign', [
+            'course'                    => $this->course->id,
+            'assignsubmission_onlinetext_enabled' => 1,
+        ]);
+        // Module creation already seeds a config row via the edit_post_actions hook;
+        // update it to enable quiz generation for this assignment.
+        $config = $DB->get_record('local_jomot_assign_config', ['assignmentid' => $assign->id]);
+        if ($config) {
+            $config->enable_quiz = 1;
+            $config->numquestions = 1;
+            $config->templatequiz = 0;
+            $config->quizvisible = 1;
+            $config->timemodified = time();
+            $DB->update_record('local_jomot_assign_config', $config);
+        } else {
+            $DB->insert_record('local_jomot_assign_config', (object) [
+                'assignmentid' => $assign->id,
+                'enable_quiz'  => 1,
+                'numquestions' => 1,
+                'quizvisible'  => 0,
+                'templatequiz' => 0,
+                'timecreated'  => time(),
+                'timemodified' => time(),
+            ]);
+        }
+
+        $cm      = get_coursemodule_from_instance('assign', $assign->id, $this->course->id, false, MUST_EXIST);
+        $context = \context_module::instance($cm->id);
+
+        // Record a submission, as the real submission flow would. Online text is left
+        // empty so no AI request is made; the access restriction does not depend on it.
+        $submission = (object) [
+            'assignment'   => $assign->id,
+            'userid'       => $student->id,
+            'timecreated'  => time(),
+            'timemodified' => time(),
+            'status'       => 'submitted',
+            'groupid'      => 0,
+            'attemptnumber' => 0,
+            'latest'       => 1,
+        ];
+        $submission->id = $DB->insert_record('assign_submission', $submission);
+
+        // Fire the event the observer listens for; this queues the adhoc task.
+        $event = \mod_assign\event\assessable_submitted::create([
+            'context'  => $context,
+            'objectid' => $submission->id,
+            'userid'   => $student->id,
+            'other'    => ['submission_editable' => false],
+        ]);
+        // Other assign event observers expect the assign instance to be set.
+        $event->set_assign(new \assign($context, $cm, $this->course));
+        $event->trigger();
+
+        // Run the queued adhoc task, which creates the quiz.
+        ob_start();
+        $this->runAdhocTasks(\local_jomot\task\create_quiz_adhoc::class);
+        ob_end_clean();
+
+        // The quiz is named after the student and locked to their email.
+        $quiz = $DB->get_record('quiz', ['name' => 'pat-lee_' . $cm->name], '*', MUST_EXIST);
+        $quizcm = get_coursemodule_from_instance('quiz', $quiz->id, $this->course->id, false, MUST_EXIST);
+
+        $this->assertNotEmpty($quizcm->availability, 'generated quiz must carry an access restriction');
+
+        $tree = json_decode($quizcm->availability, true);
+        $this->assertSame('&', $tree['op']);
+        $this->assertSame([false], $tree['showc'], 'restriction must be hidden from other users');
+
+        $condition = $tree['c'][0];
+        $this->assertSame('profile', $condition['type']);
+        $this->assertSame('email', $condition['sf']);
+        $this->assertSame('isequalto', $condition['op']);
+        $this->assertSame($student->email, $condition['v'], 'quiz must be locked to the submitting student email');
+
+        // quizvisible = 1 in config must make the generated quiz visible.
+        $this->assertEquals(1, $quizcm->visible, 'quiz must be visible when quizvisible is enabled');
+    }
+
+    /**
+     * With quizvisible disabled in the assignment config, the generated quiz is hidden.
+     */
+    public function test_adhoc_task_respects_quizvisible_flag(): void {
+        global $DB;
+
+        $student = $this->getDataGenerator()->create_user([
+            'firstname' => 'Kim',
+            'lastname'  => 'Roe',
+            'email'     => 'kim.roe@example.com',
+        ]);
+
+        // Visible quiz when quizvisible = 1.
+        $task = new \local_jomot\task\create_quiz_adhoc();
+        $task->set_custom_data([
+            'courseid'       => $this->course->id,
+            'userid'         => $student->id,
+            'assignmentname' => 'Visible',
+            'submissiontext' => '',
+            'numquestions'   => 1,
+            'templatequiz'   => 0,
+            'quizvisible'    => 1,
+        ]);
+        ob_start();
+        $task->execute();
+        ob_end_clean();
+
+        $quiz = $DB->get_record('quiz', ['name' => 'kim-roe_Visible'], '*', MUST_EXIST);
+        $cm   = get_coursemodule_from_instance('quiz', $quiz->id, $this->course->id, false, MUST_EXIST);
+        $this->assertEquals(1, $cm->visible, 'quizvisible=1 must create a visible quiz');
+
+        // Hidden quiz when quizvisible = 0.
+        $task = new \local_jomot\task\create_quiz_adhoc();
+        $task->set_custom_data([
+            'courseid'       => $this->course->id,
+            'userid'         => $student->id,
+            'assignmentname' => 'Hidden',
+            'submissiontext' => '',
+            'numquestions'   => 1,
+            'templatequiz'   => 0,
+            'quizvisible'    => 0,
+        ]);
+        ob_start();
+        $task->execute();
+        ob_end_clean();
+
+        $quiz = $DB->get_record('quiz', ['name' => 'kim-roe_Hidden'], '*', MUST_EXIST);
+        $cm   = get_coursemodule_from_instance('quiz', $quiz->id, $this->course->id, false, MUST_EXIST);
+        $this->assertEquals(0, $cm->visible, 'quizvisible=0 must create a hidden quiz');
+    }
+
+    /**
      * The quiz must have a first section row created in quiz_sections.
      */
     public function test_quiz_section_created(): void {

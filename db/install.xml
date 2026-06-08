@@ -12,6 +12,7 @@
         <FIELD NAME="numquestions" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="5" COMMENT="Number of questions to generate"/>
         <FIELD NAME="quizvisible" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" COMMENT="Whether generated quizzes are visible to students immediately"/>
         <FIELD NAME="prompt" TYPE="text" NOTNULL="false" COMMENT="Additional prompt appended to the default AI prompt"/>
+        <FIELD NAME="templatequiz" TYPE="int" LENGTH="10" NOTNULL="false" DEFAULT="0" COMMENT="Quiz instance id whose settings are copied into generated quizzes (0 = none)"/>
         <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
         <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
       </FIELDS>

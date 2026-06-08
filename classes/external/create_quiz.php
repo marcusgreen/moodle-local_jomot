@@ -249,6 +249,11 @@ class create_quiz extends external_api {
 
         $course = $DB->get_record('course', ['id' => $courseid], '*', MUST_EXIST);
 
+        // templatequiz is a meta-override (a quiz instance id), not a build_moduleinfo
+        // field, so pull it out before merging the build parameters.
+        $templatequiz = (int) ($overrides['templatequiz'] ?? 0);
+        unset($overrides['templatequiz']);
+
         $params = array_merge([
             'courseid'           => $courseid,
             'name'               => $name,
@@ -282,6 +287,9 @@ class create_quiz extends external_api {
             : [];
 
         $moduleinfo = self::build_moduleinfo($params, $course);
+        if ($templatequiz) {
+            self::apply_template_to_moduleinfo($moduleinfo, $templatequiz);
+        }
         $moduleinfo = add_moduleinfo($moduleinfo, $course);
 
         self::add_questions_to_quiz((int) $moduleinfo->instance, $moduleinfo->name, $questions);
@@ -509,5 +517,48 @@ class create_quiz extends external_api {
             ]],
             'showc' => [false],
         ]);
+    }
+
+    /**
+     * Copies a curated set of settings from an existing template quiz into the
+     * moduleinfo for the quiz about to be created.
+     *
+     * Deliberately excludes name, intro, visibility, open/close times and any
+     * availability restriction so the per-student naming and access logic in
+     * create() is preserved; only the behavioural/grading/review settings are
+     * inherited from the template.
+     *
+     * @param \stdClass $moduleinfo  Modified in place.
+     * @param int       $templatequiz Quiz instance id to copy settings from.
+     */
+    private static function apply_template_to_moduleinfo(\stdClass $moduleinfo, int $templatequiz): void {
+        global $DB;
+
+        $tpl = $DB->get_record('quiz', ['id' => $templatequiz]);
+        if (!$tpl) {
+            return;
+        }
+
+        $fields = [
+            'timelimit', 'overduehandling', 'graceperiod', 'attempts',
+            'grademethod', 'decimalpoints', 'questiondecimalpoints',
+            'questionsperpage', 'navmethod', 'shuffleanswers', 'preferredbehaviour',
+            'canredoquestions', 'attemptonlast', 'browsersecurity',
+            'delay1', 'delay2', 'showuserpicture', 'showblocks', 'subnet', 'grade',
+            'reviewattempt', 'reviewcorrectness', 'reviewmaxmarks', 'reviewmarks',
+            'reviewspecificfeedback', 'reviewgeneralfeedback',
+            'reviewrightanswer', 'reviewoverallfeedback',
+        ];
+        foreach ($fields as $f) {
+            if (isset($tpl->$f)) {
+                $moduleinfo->$f = $tpl->$f;
+            }
+        }
+
+        // The quiz table stores the access password in 'password' but
+        // add_moduleinfo() expects it as 'quizpassword'.
+        if (isset($tpl->password)) {
+            $moduleinfo->quizpassword = $tpl->password;
+        }
     }
 }

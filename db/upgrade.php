@@ -44,5 +44,16 @@ function xmldb_local_jomot_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026050500, 'local', 'jomot');
     }
 
+    if ($oldversion < 2026060400) {
+        $table = new xmldb_table('local_jomot_assign_config');
+
+        $field = new xmldb_field('templatequiz', XMLDB_TYPE_INTEGER, '10', null, null, null, '0', 'prompt');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        upgrade_plugin_savepoint(true, 2026060400, 'local', 'jomot');
+    }
+
     return true;
 }
