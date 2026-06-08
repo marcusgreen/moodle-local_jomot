@@ -8,12 +8,20 @@ When a student submits an assignment, the plugin automatically builds a quiz tai
 - Works in the background — quizzes appear after the next cron run without any intervention
 - Quizzes are named after each student that has made a submission.
 - Quiz can only be taken by the student it is named after.
+- Optionally copy the settings (time limit, attempts, grade method, review options, etc.) from an existing quiz in the course into the generated quizzes.
 
 ## Quick Start (Teachers)
 
 1. Open any assignment → **Edit settings**
-2. Find the **Just One More Thing** section (bottom of form) → enable **Generate quiz from assignment** → Save
-3. Once a student submits, their personalised quiz appears automatically in the course
+2. Find the **Just One More Thing** section (bottom of form) → enable **Generate quiz from assignment**
+3. (Optional) pick a **Template quiz** to copy settings from, set the number of questions, visibility and an extra AI prompt → Save
+4. Once a student submits, their personalised quiz appears automatically in the course
+
+## Template quizzes
+
+Choose an existing quiz in the course as a template and its behavioural, grading and review settings are copied into each generated quiz. Per-student naming, visibility and access remain controlled by the plugin.
+
+Admins can set a **Template tag** (Site administration → Plugins → Just One More Thing). When set, only quizzes whose activity carries that tag appear in the template selector; otherwise every quiz in the course is listed.
 
 ## Requirements
 
