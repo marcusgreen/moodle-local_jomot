@@ -25,7 +25,7 @@ Each quiz:
 3. Tick **Generate quiz from assignment**.
 4. Save the form.
 
-![Enabling quiz generation in the assignment settings form](jmol_form.png)
+![Enabling quiz generation in the assignment settings form](jmot_form.png)
 
 The help icon next to the checkbox explains: *"When enabled, Just One More Thing will
 automatically generate a quiz based on this assignment's content after submission."*
