@@ -292,6 +292,13 @@ class create_quiz extends external_api {
         }
         $moduleinfo = add_moduleinfo($moduleinfo, $course);
 
+        // Copy questions from the template quiz first (if any), so they occupy
+        // the leading slots and AI-generated questions are appended after them.
+        if ($templatequiz) {
+            $newquiz = $DB->get_record('quiz', ['id' => $moduleinfo->instance], '*', MUST_EXIST);
+            self::copy_template_questions($newquiz, $templatequiz);
+        }
+
         self::add_questions_to_quiz((int) $moduleinfo->instance, $moduleinfo->name, $questions);
 
         \local_jomot\event\quiz_created::create([
@@ -559,6 +566,64 @@ class create_quiz extends external_api {
         // add_moduleinfo() expects it as 'quizpassword'.
         if (isset($tpl->password)) {
             $moduleinfo->quizpassword = $tpl->password;
+        }
+    }
+
+    /**
+     * Copies the questions from a template quiz into a freshly created quiz.
+     *
+     * Concrete questions are added by reference (a new slot that points at the
+     * template question's existing question bank entry), exactly as Moodle's
+     * "add from question bank" does, so later edits to a template question
+     * propagate to quizzes created afterwards. Random-question slots are
+     * replicated from their filter condition. Slot order, page breaks and per-
+     * slot maximum marks are preserved.
+     *
+     * @param \stdClass $newquiz      The quiz record questions are copied into.
+     * @param int       $templatequiz Quiz instance id to copy questions from.
+     */
+    private static function copy_template_questions(\stdClass $newquiz, int $templatequiz): void {
+        global $CFG, $DB;
+
+        require_once($CFG->dirroot . '/mod/quiz/locallib.php');
+
+        $tplcm = get_coursemodule_from_instance('quiz', $templatequiz, 0, false);
+        if (!$tplcm) {
+            mtrace("local_jomot: template quiz {$templatequiz} has no course module; no questions copied.");
+            return;
+        }
+        $tplcontext = \context_module::instance($tplcm->id);
+
+        $structure = \mod_quiz\question\bank\qbank_helper::get_question_structure($templatequiz, $tplcontext);
+        if (!$structure) {
+            return;
+        }
+
+        $newsettings = null;
+        $added = 0;
+        foreach ($structure as $slot) {
+            if (!empty($slot->random)) {
+                // Random-question slot: replicate via the structure API using the
+                // already-converted filter condition. One question per slot.
+                $newsettings = $newsettings ?? \mod_quiz\quiz_settings::create($newquiz->id);
+                $newsettings->get_structure()->add_random_questions(0, 1, $slot->filtercondition);
+                $added++;
+                continue;
+            }
+            if (empty($slot->questionid)) {
+                // Slot has no usable (non-draft) question version; skip it.
+                continue;
+            }
+            // Concrete question: add a reference to the same question bank entry,
+            // appended at the end (page 0) so template slot order is preserved.
+            quiz_add_quiz_question((int) $slot->questionid, $newquiz, 0, $slot->maxmark);
+            $added++;
+        }
+
+        if ($added > 0) {
+            \mod_quiz\quiz_settings::create($newquiz->id)
+                ->get_grade_calculator()
+                ->recompute_quiz_sumgrades();
         }
     }
 }

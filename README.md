@@ -8,7 +8,7 @@ When a student submits an assignment, the plugin automatically builds a quiz tai
 - Works in the background — quizzes appear after the next cron run without any intervention
 - Quizzes are named after each student that has made a submission.
 - Quiz can only be taken by the student it is named after.
-- Optionally copy the settings (time limit, attempts, grade method, review options, etc.) from an existing quiz in the course into the generated quizzes.
+- Optionally copy the settings (time limit, attempts, grade method, review options, etc.) and the questions from an existing quiz in the course into the generated quizzes.
 
 ## Quick Start (Teachers)
 
@@ -19,7 +19,7 @@ When a student submits an assignment, the plugin automatically builds a quiz tai
 
 ## Template quizzes
 
-Choose an existing quiz in the course as a template and its behavioural, grading and review settings are copied into each generated quiz. Per-student naming, visibility and access remain controlled by the plugin.
+Choose an existing quiz in the course as a template and its behavioural, grading and review settings are copied into each generated quiz. Any questions in the template quiz are also copied into each generated quiz (by reference, preserving their order and marks), and the AI-generated questions for the student's submission are appended after them. Per-student naming, visibility and access remain controlled by the plugin.
 
 Admins can set a **Template tag** (Site administration → Plugins → Just One More Thing). When set, only quizzes whose activity carries that tag appear in the template selector; otherwise every quiz in the course is listed.
 

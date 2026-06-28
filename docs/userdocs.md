@@ -79,7 +79,9 @@ When editing the assignment you can also control:
 - **Additional AI prompt** — extra text appended to the default prompt, to steer how the AI
   generates questions and feedback for this assignment.
 - **Template quiz** — pick an existing quiz in the course whose settings (time limit, attempts,
-  grade method, review options, etc.) are copied into each generated quiz. Per-student naming,
+  grade method, review options, etc.) are copied into each generated quiz. Any questions in the
+  template quiz are also copied into each generated quiz, keeping their order and marks; the
+  AI-generated questions for the student's submission are added after them. Per-student naming,
   visibility and access are still controlled by the plugin. Choose *Default settings (no
   template)* to use the plugin defaults.
 

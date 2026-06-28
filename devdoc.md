@@ -80,7 +80,26 @@ add_moduleinfo()  ← Moodle core
         │  creates quiz, grade item, calendar events
         ▼
         DB: mdl_quiz, mdl_course_modules, …
+        │
+        ▼
+copy_template_questions()   (only when a template quiz is set)
+        │  reads template slots via qbank_helper::get_question_structure()
+        │  concrete Q → quiz_add_quiz_question() by reference (order + maxmark kept)
+        │  random Q   → structure->add_random_questions() from filter condition
+        ▼
+add_questions_to_quiz()
+        │  appends the AI-generated questions after the template questions
+        ▼
+        DB: mdl_quiz_slots, mdl_question_references, …
 ```
+
+When a template quiz is selected, `create_quiz::create()` copies both its
+**settings** (`apply_template_to_moduleinfo()`) and its **questions**
+(`copy_template_questions()`). Questions are added by reference — a new slot
+pointing at the template question's existing question bank entry — so later
+edits to a template question propagate to quizzes generated afterwards.
+Template questions occupy the leading slots; AI-generated questions are
+appended after them.
 
 ---
 
