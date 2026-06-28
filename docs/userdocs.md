@@ -37,8 +37,35 @@ run that task sends the student's submission to the AI, generates the questions,
 the quiz in the course — named after the student, and restricted so only that student can
 access it.
 
-Only the **online text** part of a submission is sent to the AI. If a submission has no online
-text, the quiz is still created but contains no AI-generated questions.
+## What kind of submissions are handled
+
+The plugin reads two kinds of submission content and combines them into the text sent to the AI:
+
+- **Online text** — the content a student types into the in-browser text editor. HTML formatting
+  is stripped, so the AI receives plain text (headings, bold, lists, links and similar markup are
+  removed; the words remain).
+- **Attached files that can be converted to text** — plain-text files (`.txt`) are read directly;
+  word-processor documents (such as DOCX or ODT) are converted to text using your site's document
+  converter. The converted text is then included alongside the online text.
+
+When both online text and files are present, the content is labelled (`[Online text submission]`
+and `[Submitted files]`) so the AI can tell the sources apart. Extracted file text is cached, so a
+student resubmitting the **same** file is not re-converted.
+
+The following are **not** read and have no effect on the generated questions:
+
+- **PDF files** — not supported in this version.
+- **Images, audio and video** — whether attached as files or embedded in the online text.
+- **Any file type your site's document converter cannot turn into text** — these are skipped and
+  noted in the cron log.
+
+Notes:
+
+- Document conversion depends on a working site **document converter** (for example unoconv or a
+  Google Drive converter) being configured by an admin. Without one, only `.txt` files and online
+  text are used.
+- If a submission has **no** usable text at all (no online text and no convertible files), the quiz
+  is still created but contains **no AI-generated questions**.
 
 ## Options
 

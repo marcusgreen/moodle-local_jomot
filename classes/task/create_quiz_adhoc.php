@@ -32,8 +32,9 @@ namespace local_jomot\task;
  *   - userid   (int): the student whose full name becomes the quiz name
  */
 class create_quiz_adhoc extends \core\task\adhoc_task {
-
     /**
+     * Get the human-readable task name shown in the admin UI.
+     *
      * @return string Human-readable task name shown in the admin UI.
      */
     public function get_name(): string {
@@ -52,6 +53,14 @@ class create_quiz_adhoc extends \core\task\adhoc_task {
 
         mtrace("local_jomot: creating quiz for '{$user->email}' in course {$data->courseid}");
 
+        // Extract submission content (online text plus convertible files) now, under
+        // cron, where slow document conversion is acceptable.
+        $extractor = new \local_jomot\submission_extractor();
+        $result = $extractor->extract((int) $data->contextid, (int) $data->submissionid);
+        foreach ($result['skippedfiles'] as $skipped) {
+            mtrace("local_jomot: WARNING file '{$skipped['filename']}' excluded ({$skipped['reason']}).");
+        }
+
         \local_jomot\external\create_quiz::create(
             (int) $data->courseid,
             $data->assignmentname,
@@ -61,7 +70,7 @@ class create_quiz_adhoc extends \core\task\adhoc_task {
                 'useremail'        => $user->email,
                 'visible'          => (int) ($data->quizvisible ?? 0),
             ],
-            $data->submissiontext ?? '',
+            $result['text'],
             (int) ($data->numquestions ?? \local_jomot\constants::DEFAULT_NUMQUESTIONS)
         );
 

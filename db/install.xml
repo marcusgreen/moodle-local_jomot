@@ -21,5 +21,17 @@
         <KEY NAME="assignmentid" TYPE="unique" FIELDS="assignmentid"/>
       </KEYS>
     </TABLE>
+    <TABLE NAME="local_jomot_extract_cache" COMMENT="Caches text extracted from submission files, keyed by content hash">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="contenthash" TYPE="char" LENGTH="40" NOTNULL="true" COMMENT="SHA1 content hash of the source file"/>
+        <FIELD NAME="extractedcontent" TYPE="text" NOTNULL="false" COMMENT="Plain text extracted from the file"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="contenthash" TYPE="unique" FIELDS="contenthash"/>
+      </KEYS>
+    </TABLE>
   </TABLES>
 </XMLDB>

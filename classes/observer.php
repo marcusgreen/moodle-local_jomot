@@ -28,7 +28,6 @@ namespace local_jomot;
  * Listens for assignment events and queues Just One More Thing adhoc tasks.
  */
 class observer {
-
     /**
      * Fired when a student finalises an assignment submission.
      *
@@ -51,18 +50,15 @@ class observer {
             return;
         }
 
-        $submissiontext = '';
-        $onlinetext = $DB->get_record('assignsubmission_onlinetext', ['submission' => $event->objectid]);
-        if ($onlinetext && !empty($onlinetext->onlinetext)) {
-            $submissiontext = trim(strip_tags($onlinetext->onlinetext));
-        }
-
+        // Slow work (reading files, document conversion) is left to the adhoc task
+        // under cron; the observer only passes the ids needed to locate the submission.
         $task = new \local_jomot\task\create_quiz_adhoc();
         $task->set_custom_data([
             'courseid'       => (int) $cm->course,
             'userid'         => (int) $event->userid,
             'assignmentname' => $cm->name,
-            'submissiontext' => $submissiontext,
+            'contextid'      => (int) $event->contextid,
+            'submissionid'   => (int) $event->objectid,
             'numquestions'   => max(1, (int) $config->numquestions ?: constants::DEFAULT_NUMQUESTIONS),
             'templatequiz'   => (int) ($config->templatequiz ?? 0),
             'quizvisible'    => (int) ($config->quizvisible ?? 0),

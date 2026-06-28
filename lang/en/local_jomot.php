@@ -46,5 +46,6 @@ $string['prompt'] = 'Additional AI prompt';
 $string['prompt_label'] = 'Additional AI prompt';
 $string['prompt_help'] = 'Text appended to the default AI prompt. Use this to give the AI extra instructions about how to generate feedback for this assignment.';
 $string['pluginname'] = 'Just One More Thing';
+$string['skipreason_conversionnotsupported'] = 'The file type could not be converted to text and was excluded from question generation.';
 $string['task_create_quiz'] = 'Create Just One More Thing quiz from assignment submission';
 $string['event_quiz_created'] = 'Just One More Thing quiz created';

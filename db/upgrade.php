@@ -55,5 +55,23 @@ function xmldb_local_jomot_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026060400, 'local', 'jomot');
     }
 
+    if ($oldversion < 2026062300) {
+        $table = new xmldb_table('local_jomot_extract_cache');
+
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('contenthash', XMLDB_TYPE_CHAR, '40', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('extractedcontent', XMLDB_TYPE_TEXT, null, null, null, null, null);
+        $table->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+        $table->add_key('contenthash', XMLDB_KEY_UNIQUE, ['contenthash']);
+
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
+        upgrade_plugin_savepoint(true, 2026062300, 'local', 'jomot');
+    }
+
     return true;
 }
