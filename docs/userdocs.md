@@ -57,7 +57,8 @@ The following are **not** read and have no effect on the generated questions:
 - **PDF files** — not supported in this version.
 - **Images, audio and video** — whether attached as files or embedded in the online text.
 - **Any file type your site's document converter cannot turn into text** — these are skipped and
-  noted in the cron log.
+  noted in the cron log. The names of skipped files are also included as a short note in the text
+  sent to the AI, so the generated questions reflect that some submitted content was not analysed.
 
 Notes:
 
