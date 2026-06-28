@@ -1,0 +1,105 @@
+#!/bin/bash
+#
+# unoconv-shim — drop-in replacement for the `unoconv` binary, for use as
+# Moodle's document converter ($CFG->pathtounoconv).
+#
+# Why this exists:
+#   The system `unoconv` (0.7) is broken against LibreOffice 26.x — it calls
+#   `unohelper.absolutize(...)`, which newer LibreOffice removed, so every real
+#   conversion throws `AttributeError: module 'unohelper' has no attribute
+#   'absolutize'`. LibreOffice itself converts fine when called directly. This
+#   shim emulates the three `unoconv` invocations Moodle's fileconverter_unoconv
+#   plugin makes and routes the actual conversion through `soffice`.
+#
+# Install:
+#   chmod +x this file, then set
+#   Site admin > Plugins > Document converters > Unoconv > Path to unoconv
+#   to the absolute path of this script. No other Moodle change required.
+#
+# See local/jomot/fileconversion_issues.md for the full background.
+
+set -u
+
+# Path to the LibreOffice binary. Override with SOFFICE_BIN if needed.
+SOFFICE_BIN="${SOFFICE_BIN:-soffice}"
+
+case "${1:-}" in
+    --version)
+        # fileconverter_unoconv parses /unoconv (\d+\.\d+)/ and requires >= 0.7.
+        echo "unoconv 0.9 (shim -> $($SOFFICE_BIN --version 2>/dev/null | head -1))"
+        exit 0
+        ;;
+    --show)
+        # Plugin parses supported formats via /\[\.(.*)\]/. Real unoconv writes
+        # this list to STDERR (the plugin reads fd 2 via proc_open), so we must
+        # too. Advertise the formats LibreOffice can read/write that we care
+        # about.
+        printf '[.txt]\n[.docx]\n[.doc]\n[.odt]\n[.rtf]\n[.pdf]\n[.html]\n' >&2
+        exit 0
+        ;;
+esac
+
+# Conversion form invoked by the plugin:
+#   <path> -f <format> -o <outfile> <infile>
+fmt=""
+out=""
+in=""
+while [ $# -gt 0 ]; do
+    case "$1" in
+        -f) fmt="${2:-}"; shift 2 ;;
+        -o) out="${2:-}"; shift 2 ;;
+        -*) shift ;;                 # ignore any other flags
+        *)  in="$1"; shift ;;
+    esac
+done
+
+if [ -z "$fmt" ] || [ -z "$out" ] || [ -z "$in" ]; then
+    echo "unoconv-shim: expected '-f FORMAT -o OUTFILE INFILE'" >&2
+    exit 2
+fi
+if [ ! -f "$in" ]; then
+    echo "unoconv-shim: input file not found: $in" >&2
+    exit 2
+fi
+
+outdir=$(dirname "$out")
+
+# Use a clean, unique LibreOffice profile per call so concurrent conversions
+# don't fight over a single locked profile (the problem unoconv's listener
+# solved). Cleaned up on exit.
+profile=$(mktemp -d "${TMPDIR:-/tmp}/unoconv-shim.XXXXXX")
+trap 'rm -rf "$profile"' EXIT
+
+# For plain text, the `Text` filter yields cleaner output than bare `txt`.
+target="$fmt"
+if [ "$fmt" = "txt" ]; then
+    target="txt:Text"
+fi
+
+"$SOFFICE_BIN" --headless --norestore \
+    -env:UserInstallation="file://$profile" \
+    --convert-to "$target" --outdir "$outdir" "$in" >/dev/null 2>&1
+rc=$?
+if [ "$rc" -ne 0 ]; then
+    echo "unoconv-shim: soffice exited $rc converting '$in' to '$fmt'" >&2
+    exit "$rc"
+fi
+
+# soffice names its output <input-basename>.<fmt> in --outdir; rename to the
+# exact path Moodle asked for.
+base=$(basename "$in")
+produced="$outdir/${base%.*}.$fmt"
+if [ "$produced" != "$out" ]; then
+    mv -f "$produced" "$out" 2>/dev/null
+fi
+if [ ! -f "$out" ]; then
+    echo "unoconv-shim: expected output not produced: $out" >&2
+    exit 1
+fi
+
+# Strip a leading UTF-8 BOM that LibreOffice's text export prepends.
+if [ "$fmt" = "txt" ]; then
+    sed -i '1s/^\xEF\xBB\xBF//' "$out" 2>/dev/null
+fi
+
+exit 0
