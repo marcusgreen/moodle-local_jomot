@@ -53,10 +53,10 @@ class create_quiz_adhoc extends \core\task\adhoc_task {
 
         mtrace("local_jomot: creating quiz for '{$user->email}' in course {$data->courseid}");
 
-        // Extract submission content (online text plus convertible files) now, under
+        // Extract submission content (online text plus supported files) now, under
         // cron, where slow document conversion is acceptable.
         $extractor = new \local_jomot\submission_extractor();
-        $result = $extractor->extract((int) $data->contextid, (int) $data->submissionid);
+        $result = $extractor->extract((int) $data->contextid, (int) $data->submissionid, (int) $user->id);
         foreach ($result['skippedfiles'] as $skipped) {
             mtrace("local_jomot: WARNING file '{$skipped['filename']}' excluded ({$skipped['reason']}).");
         }

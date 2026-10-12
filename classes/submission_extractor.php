@@ -27,9 +27,10 @@ namespace local_jomot;
 /**
  * Builds a single block of plain text from everything a student submitted.
  *
- * Reads the online text editor content and any attached files, converting
- * office documents (DOCX, ODT, etc.) to text via the site document converter.
- * PDF and image submissions are not supported and are reported as skipped.
+ * Reads the online text editor content and any attached files. File text is
+ * extracted by local_ai_content, which handles plain text, office documents
+ * (via the site document converter) and, when its AI backend supports
+ * image-to-text, PDFs and images. Extraction results are cached there.
  */
 class submission_extractor {
     /**
@@ -37,9 +38,10 @@ class submission_extractor {
      *
      * @param int $contextid The assignment (module) context id.
      * @param int $submissionid The assign submission id (assign_submission.id).
+     * @param int $userid The user AI extraction requests are attributed to (quota, audit).
      * @return array{text: string, skippedfiles: list<array{filename: string, reason: string}>}
      */
-    public function extract(int $contextid, int $submissionid): array {
+    public function extract(int $contextid, int $submissionid, int $userid): array {
         global $DB;
 
         $onlinetext = '';
@@ -48,7 +50,7 @@ class submission_extractor {
             $onlinetext = trim(strip_tags($record->onlinetext));
         }
 
-        $fileresult = $this->extract_content_from_files($contextid, $submissionid);
+        $fileresult = $this->extract_content_from_files($contextid, $submissionid, $userid);
 
         return [
             'text' => $this->build_structured_submission($onlinetext, $fileresult['text'], $fileresult['skippedfiles']),
@@ -94,14 +96,16 @@ class submission_extractor {
     /**
      * Extract text from all files attached to a submission.
      *
-     * Plain text files are read directly; other document types are converted to
-     * text via the site document converter. PDF and image files are not supported.
+     * Delegates per-file extraction to local_ai_content. Files it does not
+     * support, files with no text and files whose extraction fails are skipped
+     * and reported with a reason.
      *
      * @param int $contextid The assignment (module) context id.
      * @param int $submissionid The assign submission id.
+     * @param int $userid The user AI extraction requests are attributed to.
      * @return array{text: string, skippedfiles: list<array{filename: string, reason: string}>}
      */
-    private function extract_content_from_files(int $contextid, int $submissionid): array {
+    private function extract_content_from_files(int $contextid, int $submissionid, int $userid): array {
         $fs = get_file_storage();
         $files = $fs->get_area_files(
             $contextid,
@@ -112,6 +116,7 @@ class submission_extractor {
             false
         );
 
+        $extractor = \core\di::get(\local_ai_content\document_extractor::class);
         $alltext = '';
         $skippedfiles = [];
 
@@ -120,107 +125,32 @@ class submission_extractor {
                 continue;
             }
 
-            $mimetype = $file->get_mimetype();
             $filename = $file->get_filename();
 
-            // Plain text files: read directly.
-            if ($mimetype === 'text/plain') {
-                $tempfile = $file->copy_content_to_temp();
-                $alltext .= file_get_contents($tempfile) . "\n";
-                unlink($tempfile);
-                mtrace("local_jomot: text content from '{$filename}' added.");
+            if (!$extractor->is_file_supported($file)) {
+                mtrace("local_jomot: file '{$filename}' ({$file->get_mimetype()}) is not supported - skipping.");
+                $skippedfiles[] = ['filename' => $filename, 'reason' => 'skipreason_conversionnotsupported'];
                 continue;
             }
 
-            // Other document types: convert to text via the site document converter.
-            $extractedtext = $this->extract_content_via_converter($file);
-            if ($extractedtext !== '') {
-                $alltext .= $extractedtext . "\n";
-                mtrace("local_jomot: text extracted from '{$filename}' via converter.");
+            try {
+                $text = $extractor->extract_text_from_file($file, $contextid, $userid, 'local_jomot');
+            } catch (\Exception $e) {
+                mtrace("local_jomot: failed to extract text from '{$filename}': " . $e->getMessage());
+                $skippedfiles[] = ['filename' => $filename, 'reason' => 'skipreason_extractionfailed'];
                 continue;
             }
 
-            mtrace("local_jomot: file '{$filename}' ({$mimetype}) could not be converted - skipping.");
-            $skippedfiles[] = [
-                'filename' => $filename,
-                'reason' => 'skipreason_conversionnotsupported',
-            ];
+            if (trim($text) === '') {
+                mtrace("local_jomot: file '{$filename}' contains no text - skipping.");
+                $skippedfiles[] = ['filename' => $filename, 'reason' => 'skipreason_nocontent'];
+                continue;
+            }
+
+            $alltext .= $text . "\n";
+            mtrace("local_jomot: text extracted from '{$filename}'.");
         }
 
         return ['text' => $alltext, 'skippedfiles' => $skippedfiles];
-    }
-
-    /**
-     * Convert a file to plain text using the site document converter.
-     *
-     * Results are cached by content hash so an unchanged file resubmitted later
-     * is not converted again.
-     *
-     * @param \stored_file $file The file to convert.
-     * @return string The extracted text, or empty string if conversion is unsupported or fails.
-     */
-    private function extract_content_via_converter(\stored_file $file): string {
-        $contenthash = $file->get_contenthash();
-        $cached = $this->get_from_cache($contenthash);
-        if ($cached !== null) {
-            mtrace("local_jomot: using cached content for '{$file->get_filename()}'.");
-            return $cached;
-        }
-
-        $converter = new \core_files\converter();
-        if (!$converter->can_convert_storedfile_to($file, 'txt')) {
-            return '';
-        }
-
-        $conversion = $converter->start_conversion($file, 'txt');
-        if ($conversion->get('status') !== \core_files\conversion::STATUS_COMPLETE) {
-            return '';
-        }
-
-        $convertedfile = $conversion->get_destfile();
-        if (!$convertedfile) {
-            return '';
-        }
-
-        $tempfile = $convertedfile->copy_content_to_temp();
-        $text = (string) file_get_contents($tempfile);
-        unlink($tempfile);
-
-        $this->store_to_cache($contenthash, $text);
-
-        return $text;
-    }
-
-    /**
-     * Get cached extracted content for a file by its content hash.
-     *
-     * @param string $contenthash The SHA1 content hash of the file.
-     * @return string|null The cached content, or null if not cached.
-     */
-    private function get_from_cache(string $contenthash): ?string {
-        global $DB;
-
-        $record = $DB->get_record('local_jomot_extract_cache', ['contenthash' => $contenthash]);
-        return $record ? $record->extractedcontent : null;
-    }
-
-    /**
-     * Store extracted content in the cache, keyed by content hash.
-     *
-     * @param string $contenthash The SHA1 content hash of the file.
-     * @param string $extractedcontent The extracted text content.
-     */
-    private function store_to_cache(string $contenthash, string $extractedcontent): void {
-        global $DB;
-
-        if ($DB->record_exists('local_jomot_extract_cache', ['contenthash' => $contenthash])) {
-            return;
-        }
-
-        $record = new \stdClass();
-        $record->contenthash = $contenthash;
-        $record->extractedcontent = $extractedcontent;
-        $record->timecreated = time();
-        $DB->insert_record('local_jomot_extract_cache', $record);
     }
 }

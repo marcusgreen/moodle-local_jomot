@@ -82,7 +82,7 @@ final class submission_extractor_test extends \advanced_testcase {
         $subid = 4001;
         $this->add_onlinetext($subid, '<p>Hello <strong>world</strong></p>');
 
-        $result = (new submission_extractor())->extract($context->id, $subid);
+        $result = (new submission_extractor())->extract($context->id, $subid, 2);
 
         $this->assertStringContainsString('Hello world', $result['text']);
         $this->assertStringNotContainsString('<strong>', $result['text']);
@@ -100,7 +100,7 @@ final class submission_extractor_test extends \advanced_testcase {
         $this->add_file($context->id, $subid, 'notes.txt', 'Attached file content');
 
         ob_start();
-        $result = (new submission_extractor())->extract($context->id, $subid);
+        $result = (new submission_extractor())->extract($context->id, $subid, 2);
         ob_end_clean();
 
         $this->assertStringContainsString('[Online text submission]', $result['text']);
@@ -121,7 +121,7 @@ final class submission_extractor_test extends \advanced_testcase {
         $this->add_file($context->id, $subid, 'data.bin', "\x00\x01binary");
 
         ob_start();
-        $result = (new submission_extractor())->extract($context->id, $subid);
+        $result = (new submission_extractor())->extract($context->id, $subid, 2);
         ob_end_clean();
 
         $this->assertStringContainsString('Some text', $result['text']);
@@ -137,31 +137,90 @@ final class submission_extractor_test extends \advanced_testcase {
         $this->resetAfterTest();
         $context = $this->make_assign_context();
 
-        $result = (new submission_extractor())->extract($context->id, 4004);
+        $result = (new submission_extractor())->extract($context->id, 4004, 2);
 
         $this->assertSame('', $result['text']);
         $this->assertSame([], $result['skippedfiles']);
     }
 
     /**
-     * Extracted file text is cached by content hash.
+     * Mock local_ai_content's extractor so a file is supported and extraction behaves as given.
+     *
+     * @param callable|string $behaviour Text to return, or a callable run in place of extraction.
      */
-    public function test_extracted_content_is_cached(): void {
-        global $DB;
+    private function mock_extractor(callable|string $behaviour): void {
+        $extractor = $this->createMock(\local_ai_content\document_extractor::class);
+        $extractor->method('is_file_supported')->willReturn(true);
+        if (is_callable($behaviour)) {
+            $extractor->method('extract_text_from_file')->willReturnCallback($behaviour);
+        } else {
+            $extractor->method('extract_text_from_file')->willReturn($behaviour);
+        }
+        \core\di::set(\local_ai_content\document_extractor::class, $extractor);
+    }
+
+    /**
+     * Extraction is attributed to the given user and to local_jomot.
+     */
+    public function test_extraction_passes_user_and_component(): void {
         $this->resetAfterTest();
         $context = $this->make_assign_context();
         $subid = 4005;
-        $this->add_file($context->id, $subid, 'notes.txt', 'Cacheable content');
+        $this->add_file($context->id, $subid, 'essay.pdf', '%PDF-1.4 fake');
 
-        // Plain-text files are read directly, not via the converter, so they are not
-        // cached. Seed the cache for a synthetic hash and confirm it is returned.
-        $hash = sha1('synthetic');
-        $DB->insert_record('local_jomot_extract_cache', (object) [
-            'contenthash' => $hash,
-            'extractedcontent' => 'cached text',
-            'timecreated' => time(),
-        ]);
+        $calls = [];
+        $this->mock_extractor(function ($file, $contextid, $userid, $component) use (&$calls) {
+            $calls[] = [$contextid, $userid, $component];
+            return 'PDF text';
+        });
 
-        $this->assertTrue($DB->record_exists('local_jomot_extract_cache', ['contenthash' => $hash]));
+        ob_start();
+        $result = (new submission_extractor())->extract($context->id, $subid, 42);
+        ob_end_clean();
+
+        $this->assertSame([[$context->id, 42, 'local_jomot']], $calls);
+        $this->assertStringContainsString('PDF text', $result['text']);
+        $this->assertSame([], $result['skippedfiles']);
+    }
+
+    /**
+     * A file that yields no text is skipped with the no-content reason.
+     */
+    public function test_empty_extraction_is_skipped(): void {
+        $this->resetAfterTest();
+        $context = $this->make_assign_context();
+        $subid = 4006;
+        $this->add_file($context->id, $subid, 'blank.pdf', '%PDF-1.4 fake');
+        $this->mock_extractor('');
+
+        ob_start();
+        $result = (new submission_extractor())->extract($context->id, $subid, 2);
+        ob_end_clean();
+
+        $this->assertSame('', $result['text']);
+        $this->assertCount(1, $result['skippedfiles']);
+        $this->assertSame('skipreason_nocontent', $result['skippedfiles'][0]['reason']);
+    }
+
+    /**
+     * A file whose extraction throws is skipped and the remaining content is kept.
+     */
+    public function test_failed_extraction_is_skipped(): void {
+        $this->resetAfterTest();
+        $context = $this->make_assign_context();
+        $subid = 4007;
+        $this->add_onlinetext($subid, '<p>Typed answer</p>');
+        $this->add_file($context->id, $subid, 'scan.png', 'fakepng');
+        $this->mock_extractor(function () {
+            throw new \moodle_exception('error_airequestfailed', 'local_ai_content');
+        });
+
+        ob_start();
+        $result = (new submission_extractor())->extract($context->id, $subid, 2);
+        ob_end_clean();
+
+        $this->assertStringContainsString('Typed answer', $result['text']);
+        $this->assertCount(1, $result['skippedfiles']);
+        $this->assertSame('skipreason_extractionfailed', $result['skippedfiles'][0]['reason']);
     }
 }

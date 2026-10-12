@@ -73,5 +73,15 @@ function xmldb_local_jomot_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026062300, 'local', 'jomot');
     }
 
+    if ($oldversion < 2026092400) {
+        // Extraction caching is now handled by local_ai_content.
+        $table = new xmldb_table('local_jomot_extract_cache');
+        if ($dbman->table_exists($table)) {
+            $dbman->drop_table($table);
+        }
+
+        upgrade_plugin_savepoint(true, 2026092400, 'local', 'jomot');
+    }
+
     return true;
 }

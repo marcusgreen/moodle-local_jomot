@@ -44,27 +44,33 @@ The plugin reads two kinds of submission content and combines them into the text
 - **Online text** — the content a student types into the in-browser text editor. HTML formatting
   is stripped, so the AI receives plain text (headings, bold, lists, links and similar markup are
   removed; the words remain).
-- **Attached files that can be converted to text** — plain-text files (`.txt`) are read directly;
-  word-processor documents (such as DOCX or ODT) are converted to text using your site's document
-  converter. The converted text is then included alongside the online text.
+- **Attached files** — text is extracted by the **AI Content Manager** plugin (`local_ai_content`).
+  Plain-text files (`.txt`, `.csv`, `.md` and similar) are read directly; word-processor documents
+  (such as DOCX or ODT) are converted to text using your site's document converter. **PDFs and
+  images** are also read when AI Content Manager is set to use the AI Manager (`local_ai_manager`)
+  backend with image-to-text available. The extracted text is included alongside the online text.
 
 When both online text and files are present, the content is labelled (`[Online text submission]`
-and `[Submitted files]`) so the AI can tell the sources apart. Extracted file text is cached, so a
-student resubmitting the **same** file is not re-converted.
+and `[Submitted files]`) so the AI can tell the sources apart. Extracted file text is cached by AI
+Content Manager, so a student resubmitting the **same** file is not extracted again.
 
 The following are **not** read and have no effect on the generated questions:
 
-- **PDF files** — not supported in this version.
-- **Images, audio and video** — whether attached as files or embedded in the online text.
-- **Any file type your site's document converter cannot turn into text** — these are skipped and
-  noted in the cron log. The names of skipped files are also included as a short note in the text
-  sent to the AI, so the generated questions reflect that some submitted content was not analysed.
+- **Audio and video**, and images embedded in the online text.
+- **Files AI Content Manager does not support**, files with no text, and files whose extraction
+  fails — these are skipped and noted in the cron log. The names of skipped files are also included
+  as a short note in the text sent to the AI, so the generated questions reflect that some submitted
+  content was not analysed.
 
 Notes:
 
 - Document conversion depends on a working site **document converter** (for example unoconv or a
-  Google Drive converter) being configured by an admin. Without one, only `.txt` files and online
-  text are used.
+  Google Drive converter) being configured by an admin. Without one, only plain-text files, online
+  text and (with a suitable AI backend) PDFs and images are used.
+- PDF and image extraction sends the student's file to the configured AI service and counts
+  against the submitting student's AI quota.
+- Supported file types for the current site configuration can be checked on AI Content Manager's
+  **Test text extraction** admin page.
 - If a submission has **no** usable text at all (no online text and no convertible files), the quiz
   is still created but contains **no AI-generated questions**.
 

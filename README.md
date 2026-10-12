@@ -27,6 +27,7 @@ Admins can set a **Template tag** (Site administration → Plugins → Just One 
 
 - Moodle 5.0 or later
 - AIText question type
+- [AI Content Manager](https://github.com/bycs-lp/moodle-local_ai_content) (`local_ai_content`) for extracting text from submitted files
 - Connection to an external LLM must be enabled
 - Admin installs the plugin once via **Site administration → Notifications**
 
