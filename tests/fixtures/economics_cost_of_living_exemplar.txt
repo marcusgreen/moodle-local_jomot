@@ -1,0 +1,19 @@
+=== TEST SETUP: delete this block before submitting ===
+Suggested Additional AI prompt (paste into the assignment's Just One More Thing settings):
+Ask challenging questions that make the student defend their overall judgement, weigh the strongest counter-argument, and apply their reasoning to a new example.
+Suggested number of questions: 5
+=== END TEST SETUP ===
+
+Why did prices rise so quickly in the UK in 2022, and what was done about it?
+
+Inflation is the rate at which the general level of prices rises over time. In the UK it is usually measured by the Consumer Prices Index (CPI), and the Bank of England has a target of 2%. In October 2022, CPI inflation reached 11.1%, the highest rate for around 40 years. This caused a "cost of living crisis", because prices were rising much faster than most people's wages. In this essay I will explain the causes of this inflation and evaluate how the government and the Bank of England responded.
+
+The main cause was cost-push inflation, which happens when firms' costs increase and they pass these costs on to consumers through higher prices. The biggest cost increase was in energy. After Russia's invasion of Ukraine in February 2022, gas prices rose sharply, because Europe relied heavily on Russian gas. Higher gas prices increased household energy bills directly, and also increased costs for businesses that use energy to make and transport goods, such as farmers, bakeries and manufacturers. This is why food prices rose particularly quickly. Supply chain problems left over from the Covid-19 pandemic added to costs, because shortages of components and shipping capacity made imported goods more expensive.
+
+There was also an element of demand-pull inflation, which happens when total demand in the economy grows faster than the economy's ability to produce goods and services. After the lockdowns ended, many households spent savings they had built up during the pandemic, at the same time as supply was still restricted. Some economists also argue that interest rates were kept very low for too long, which encouraged borrowing and spending.
+
+The Bank of England's main tool is the base interest rate. It raised the rate from 0.1% in December 2021 to 5.25% by August 2023. Higher interest rates make borrowing more expensive and saving more attractive, which should reduce spending and therefore reduce demand-pull inflation. However, this policy has limits. Interest rates cannot directly lower the price of gas, which is set on world markets, so they are less effective against cost-push inflation. Higher rates also caused problems of their own, especially for people with mortgages whose monthly payments rose sharply.
+
+The government's main response was the Energy Price Guarantee, which limited the unit price that households paid for energy, along with cost-of-living payments to lower-income households. These measures protected people from the worst of the price rises, but they were very expensive and were funded by government borrowing. Some economists also argued that support which was not targeted at the poorest households kept demand high and made it harder for the Bank of England to reduce inflation.
+
+In conclusion, the 2022 inflation was mainly cost-push, caused by the rise in energy prices following the invasion of Ukraine, with extra demand-pull pressure as the economy reopened after the pandemic. Raising interest rates helped to reduce demand, but could not tackle energy prices directly, while government support reduced hardship at a large cost to public finances. Inflation had fallen significantly by 2024, but prices themselves did not fall, so many households remain worse off than before the crisis.

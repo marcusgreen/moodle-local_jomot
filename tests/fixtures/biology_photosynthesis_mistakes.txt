@@ -1,0 +1,51 @@
+=== TEST SETUP: delete this block before submitting ===
+Suggested Additional AI prompt (paste into the assignment's Just One More Thing settings):
+Where the student makes scientific errors, ask questions that expose the misconception without giving away the correct answer. Do not ask about spelling or grammar.
+Suggested number of questions: 5
+=== END TEST SETUP ===
+
+Photosynthesis: How Plants Make Their Food
+
+Introduction
+Photosynthesis is the process that plants use to make their own food, and it is probably the most important reaction on Earth because nearly every food chain starts with it. In this essay I will explain what photosynthesis is, where it happens, what it needs and what affects how fast it goes.
+
+What is photosynthesis?
+Photosynthesis is when a plant takes in carbon dioxide and water and uses light to turn them into glucose and oxygen. The word equation is:
+
+carbon dioxide + water → glucose + oxygen
+
+The symbol equation is CO2 + H2O → C6H12O6 + O2. The light is written above the arrow because it is needed but it is not a chemical. The plant basically breaths in carbon dioxide and breaths out oxygen, which is the opposite of what animals do. This is why plants do photosynthesis and animals do respiration, and plants don't need to respire because they already make there own energy.
+
+Where does it happen?
+Photosynthesis happens in the leaves, inside tiny structures called chloroplasts. Chloroplasts contain a green pigment called chlorophyl. Chlorophyll is green because it absorbs green light, and it uses this green light to power the reaction. This is why plants grow best under green light.
+
+Leaves are adapted for photosynthesis in lots of ways. They are broad and flat to absorb as much light as possible, and thin so carbon dioxide does not have far to diffuse. Palisade cells near the top of the leaf are packed with chloroplasts because this is where most light hits. Below them the spongy mesophyll has air spaces so gases can move around.
+
+Gases get in and out of the leaf through small holes called stomata. Most of the stomata are on the top surface of the leaf so they can recieve more carbon dioxide from the air. Each stoma has two guard cells which open and close it. The guard cells close when it is hot and dry to stop the plant losing too much water.
+
+Water gets to the leaf from the roots through the xylem. The glucose that is made in the leaf is also carried away from the leaf by the xylem to other parts of the plant where it is needed, like the roots and the growing tips.
+
+Where does the oxygen come from?
+The oxygen that plants give off comes from the carbon dioxide. The plant splits the carbon dioxide into carbon and oxygen, keeps the carbon to build glucose and releases the oxygen into the air as a waste product. Most of it diffuses out of the stomata.
+
+What happens to the glucose?
+Plants use glucose in lots of ways. They turn some of it into cellulose to build cell walls, and they combine it with nitrate ions from the soil to make amino acids and proteins. They also store glucose as glucose in the roots and leaves because it is easy to use later. Some plants, such as potatoes, store it as starch. We can test a leaf for starch using iodine solution, which turns from orange-brown to red if starch is present.
+
+Most of a plant's mass comes from the soil. When a seed grows into a big tree, the extra mass comes from the minerals and nutrients the roots take up from the soil, which is why farmers add fertiliser. The glucose from photosynthesis is mainly used for energy rather than building the plant.
+
+Factors affecting the rate of photosynthesis
+There are three main factors that affect how fast photosynthesis happens: light intensity, carbon dioxide concentration and temperature.
+
+Light intensity: The more light a plant gets, the faster it photosynthesises. This keeps going up forever, so a plant in very bright light will always photosynthesise faster than one in dimmer light.
+
+Carbon dioxide concentration: Carbon dioxide is one of the reactants, so if there is more of it, photosynthesis goes faster. This is why some farmers pump extra carbon dioxide into greenhouses.
+
+Temperature: Photosynthesis is controlled by enzymes, so as temperature increases, the rate increases because the molecules have more energy and collide more often. The hotter it is, the faster photosynthesis will be, which is why plants grow so well in tropical countries.
+
+When one of these factors is in short supply it stops photosynthesis going any faster. This is called a limiting factor. For example, at night light is the limiting factor, and on a cold winter day the temperature is probably the limiting factor.
+
+My experiment
+In class we investigated light intensity by putting pondweed in a test tube of water and moving a lamp to different distances from it, then counting the bubbles of oxygen given off in one minute. At 10 cm we counted 42 bubbles, at 20 cm 25 bubbles, at 30 cm 11 bubbles and at 40 cm 5 bubbles. This shows that as the lamp gets closer, the rate of photosynthesis increases. One problem was that the lamp also heated the water. Also the bubbles are different sizes, so it would be better to collect the gas in a measuring cylinder.
+
+Conclusion
+Plants use light energy to make glucose and oxygen from carbon dioxide and water, and the speed depends on light, carbon dioxide and temperature. Photosynthesis creates energy for the plant, and without it there would be no food and no oxygen for any living things.

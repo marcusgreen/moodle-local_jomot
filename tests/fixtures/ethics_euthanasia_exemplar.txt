@@ -1,0 +1,19 @@
+=== TEST SETUP: delete this block before submitting ===
+Suggested Additional AI prompt (paste into the assignment's Just One More Thing settings):
+Ask challenging questions that make the student defend their overall judgement, weigh the strongest counter-argument, and apply their reasoning to a new example.
+Suggested number of questions: 5
+=== END TEST SETUP ===
+
+Should euthanasia be legal?
+
+Euthanasia means deliberately ending a person's life to relieve suffering. It is important to separate voluntary euthanasia, where a person with mental capacity asks to die, from non-voluntary euthanasia, where the person cannot give consent, and from assisted dying, where a doctor provides the means but the patient takes the final action. In the UK, helping someone to end their life is a crime under the Suicide Act 1961, although the issue has been debated in Parliament several times. In this essay I will argue that voluntary assisted dying for terminally ill adults should be legal, but only with strict safeguards.
+
+The strongest argument in favour is autonomy: the idea that competent adults should be able to make decisions about their own bodies and lives. We already accept that patients can refuse life-saving treatment, so it seems inconsistent to deny them control over the manner and timing of an inevitable death. A second argument is compassion. Even with excellent palliative care, a small number of patients experience pain or loss of dignity that cannot be relieved. A utilitarian would argue that allowing these patients to die reduces overall suffering without harming anyone else.
+
+However, there are serious arguments against. Many religious believers, including Christians who hold the principle of the sanctity of life, argue that life is a gift from God and that only God should decide when it ends. A secular version of this argument comes from Kant, who claimed that we should never treat a person merely as a means, and that ending a life to escape suffering fails to respect the value of the person. There is also the practical "slippery slope" argument: once euthanasia is legal for the terminally ill, the rules may gradually widen. Critics point to Canada, where eligibility for medical assistance in dying was extended beyond people whose death was reasonably foreseeable a few years after it was first legalised in 2016.
+
+The most convincing objection, in my view, is the risk to vulnerable people. Disabled and elderly people may feel pressure to choose death so that they are not a burden on their families or on the NHS, even if nobody pressures them directly. This concern cannot be dismissed, because pressure of this kind is hard to detect.
+
+Nevertheless, I do not think this objection is strong enough to justify a complete ban. Evidence from places such as Oregon, which has allowed assisted dying since 1997, suggests that a narrowly written law can be applied without a dramatic slippery slope. Oregon's law applies only to adults with a terminal diagnosis of six months or less, requires two doctors' approval and a waiting period, and requires patients to take the medication themselves. Safeguards like these directly address the risk of pressure and coercion. It is also worth noting that the current law does not remove suffering; it simply means that some people travel abroad to die, often earlier than they would otherwise choose, while others suffer at home.
+
+In conclusion, I believe the arguments from autonomy and compassion outweigh the objections, provided the law is limited to terminally ill adults with mental capacity and includes strong, independently checked safeguards. The concerns about vulnerable people are important, but they are best answered by careful regulation rather than a total ban, and any new law should be reviewed regularly to make sure its limits are not being quietly widened.

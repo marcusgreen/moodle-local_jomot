@@ -1,0 +1,19 @@
+=== TEST SETUP: delete this block before submitting ===
+Suggested Additional AI prompt (paste into the assignment's Just One More Thing settings):
+Ask challenging questions that make the student defend their overall judgement, weigh the strongest counter-argument, and apply their reasoning to a new example.
+Suggested number of questions: 5
+=== END TEST SETUP ===
+
+Does social media harm teenagers' mental health?
+
+Over the last fifteen years, social media use among teenagers has become almost universal, and during the same period rates of anxiety and depression among young people, particularly girls, have risen in countries such as the UK and the USA. Many people assume that the first trend caused the second. In this essay I will evaluate the evidence and argue that social media can harm some teenagers, but that the research does not yet show it is the main cause of the decline in young people's mental health.
+
+There are several psychological explanations for how social media could cause harm. Social comparison theory, proposed by Leon Festinger in 1954, suggests that people judge themselves by comparing themselves with others. Social media constantly shows edited, idealised images of other people's appearance and lives, which may encourage upward comparison and lower self-esteem. Another explanation is displacement: time spent online may replace activities that protect mental health, such as sleep, exercise and face-to-face contact. Using phones late at night is linked to shorter and poorer-quality sleep, and poor sleep is a well-established risk factor for depression. Some writers, such as Jonathan Haidt in The Anxious Generation, argue that these effects are large and that smartphones have fundamentally changed childhood for the worse.
+
+However, much of the evidence is correlational. Studies often find that teenagers who spend more time on social media report lower wellbeing, but correlation does not show causation. It is possible that teenagers who are already anxious or lonely spend more time online, rather than the other way round, or that a third factor, such as problems at home, affects both. In addition, many studies rely on self-reported screen time, which is often inaccurate.
+
+The size of the effect is also debated. In a large 2019 study, Amy Orben and Andrew Przybylski analysed data from over 350,000 adolescents and found that the association between technology use and wellbeing was negative but very small, comparable to the association between wellbeing and eating potatoes. This suggests that, on average, social media explains only a tiny part of the differences in teenagers' mental health. On the other hand, averages can hide important differences. A small average effect could still include a minority of teenagers who are seriously harmed, for example those exposed to content about self-harm or eating disorders, or those who are bullied online.
+
+It is also important to consider the benefits. Social media allows teenagers to maintain friendships, find communities, and access support, which can be especially valuable for young people who feel isolated, such as LGBTQ+ teenagers in areas where they do not know others like them. How social media is used seems to matter more than how much: active use, such as messaging friends, appears less harmful than passive scrolling.
+
+In conclusion, there are plausible psychological reasons why social media could harm teenagers' mental health, and it clearly does harm some individuals. However, the strongest large-scale evidence suggests that the average effect is small and that correlation has often been mistaken for causation. Rather than treating social media as simply good or bad, it would be more useful to identify which types of use, content and teenagers are most at risk, and to target support and regulation at those.

@@ -1,0 +1,25 @@
+=== TEST SETUP: delete this block before submitting ===
+Suggested Additional AI prompt (paste into the assignment's Just One More Thing settings):
+Focus on the student's own data and evaluation. Ask them to explain the shape of their results using collision theory and denaturation, and to justify why each of their suggested improvements would make the results more accurate.
+Suggested number of questions: 5
+=== END TEST SETUP ===
+
+The Effect of Temperature on the Activity of Amylase
+
+Aim
+To investigate how temperature affects the rate at which the enzyme amylase breaks down starch.
+
+Background
+Enzymes are biological catalysts made of protein. Each enzyme has an active site with a specific shape that is complementary to its substrate. Amylase breaks starch down into maltose. According to the collision theory, increasing temperature gives molecules more kinetic energy, so the enzyme and substrate collide more often and more enzyme–substrate complexes form. However, above the optimum temperature the bonds holding the enzyme's tertiary structure break, the active site changes shape, and the enzyme becomes denatured.
+
+Method
+I set up water baths at 20 °C, 30 °C, 35 °C, 40 °C, 50 °C and 60 °C. For each temperature I mixed 2 cm³ of 1% starch solution with 2 cm³ of amylase solution, kept at pH 7 using a buffer. Every 10 seconds I took a drop of the mixture and added it to iodine on a spotting tile. I recorded the time taken for the iodine to stop turning blue-black, which showed that all the starch had been broken down. I repeated each temperature three times and calculated a mean.
+
+Results
+The mean times were: 20 °C – 94 s, 30 °C – 41 s, 35 °C – 12 s, 40 °C – 23 s, 50 °C – 78 s, and at 60 °C the starch was not broken down within 300 s. The fastest reaction was at 35 °C, which suggests the optimum temperature for this amylase is close to 35 °C.
+
+Conclusion
+As temperature increased from 20 °C to 35 °C, the rate of reaction increased because of more frequent successful collisions. Above 35 °C the rate fell sharply, and at 60 °C the enzyme appears to have been completely denatured, because no starch was digested. This supports my prediction, although I expected the optimum to be nearer 37 °C, body temperature.
+
+Evaluation
+The iodine test is subjective because it is hard to judge exactly when the blue-black colour disappears, so my end points may be out by several seconds. Taking a sample only every 10 seconds also limits accuracy, which matters most at 35 °C where the reaction was very fast. My repeats at 50 °C varied from 64 s to 91 s, which suggests the water bath temperature was not stable. To improve the experiment I would use a colorimeter to measure the colour change objectively, sample more frequently, and test more temperatures between 30 °C and 40 °C to find the optimum more precisely. I would also pre-heat the enzyme and starch separately before mixing, because in my experiment they started at room temperature.

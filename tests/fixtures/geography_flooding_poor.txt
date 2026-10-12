@@ -1,0 +1,21 @@
+=== TEST SETUP: delete this block before submitting ===
+Suggested Additional AI prompt (paste into the assignment's Just One More Thing settings):
+Ask the student to explain the processes behind flooding (not just 'rain'), to check factual claims such as melting ice caps and summer flooding, and to weigh the costs of hard engineering.
+Suggested number of questions: 3
+=== END TEST SETUP ===
+
+What causes river flooding in the UK, and how can it be managed?
+
+Flooding is when a river gets to much water in it and it goes over the sides. It happens a lot in the UK because it rains all the time.
+
+The main cause of flooding is rain. When it rains loads the river fills up and floods. Another cause is climate change because the ice caps are melting and this makes the rivers higher. Also rivers flood more in summer because there are more storms.
+
+People make flooding worse by building houses and cutting down trees. Trees soak up water so if there are no trees the water goes in the river instead.
+
+There was a big flood in Cumbria a few years ago and lots of houses got flooded and people had to leave there homes. It was on the news for ages and it cost loads of money to fix.
+
+To stop flooding you can build walls next to the river which stop the water getting out. You can also build dams. These are the best way to stop flooding because they stop all the water. You can also put sandbags outside your house.
+
+Planting trees is another way but it is not as good because it takes years for them to grow.
+
+In conclusion flooding is caused by rain and people and the best way to stop it is to build big walls and dams everywhere near rivers.

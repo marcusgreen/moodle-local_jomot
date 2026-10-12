@@ -1,0 +1,19 @@
+=== TEST SETUP: delete this block before submitting ===
+Suggested Additional AI prompt (paste into the assignment's Just One More Thing settings):
+Ask challenging questions that make the student defend their overall judgement, weigh the strongest counter-argument, and apply their reasoning to a new example.
+Suggested number of questions: 5
+=== END TEST SETUP ===
+
+Why did Woolworths collapse?
+
+Woolworths was one of the most familiar names on the British high street for almost 100 years, famous for pick 'n' mix sweets, toys, music and household goods. Yet in November 2008 the company went into administration, and by January 2009 all of its roughly 800 stores had closed, with the loss of around 27,000 jobs. In this essay I will analyse the internal and external factors that caused its collapse and judge which were most important.
+
+One of the most important internal problems was the lack of a clear unique selling point. Woolworths sold a very wide range of products, but it was not the cheapest, the most convenient or the best place to buy any of them. Customers wanting cheap groceries and household goods went to supermarkets, people wanting toys went to specialist retailers, and people buying music and DVDs increasingly shopped online. Woolworths was stuck in the middle, without a strong reason for customers to choose it.
+
+A second internal problem was its finances. When Woolworths was separated from its parent company, Kingfisher, in 2001, many of its stores were sold and then rented back, a deal known as a sale and leaseback. This raised cash in the short term, but it meant that Woolworths had to pay rent on stores it had previously owned, which increased its fixed costs for years afterwards. High fixed costs are especially dangerous for a retailer with low profit margins, because a small fall in sales can quickly turn a profit into a loss.
+
+External factors also played a major role. The growth of the large supermarkets, such as Tesco and Asda, was a serious threat, because they began selling non-food items such as DVDs, toys and homeware at very low prices, using their huge buying power. At the same time, the rise of online retailers such as Amazon, and later digital downloads, reduced demand for CDs and DVDs, which had been an important part of Woolworths' sales. Finally, the 2008 financial crisis was the immediate trigger for the collapse. Banks became much less willing to lend, and suppliers became worried about being paid, so they reduced the credit they offered. For a business with high costs and weak profits, this lack of credit meant that it could not buy enough stock for the crucial Christmas period.
+
+In my judgement, the financial crisis caused the timing of the collapse, but it was not the underlying cause. Many other retailers survived the crisis. Woolworths failed because it had already been weakened for years by its unclear position in the market and its high rent costs, which left it with no financial buffer when credit dried up. If it had developed a clear specialism, for example in toys and children's products, it might have been able to compete with both supermarkets and online retailers.
+
+In conclusion, Woolworths collapsed because of a combination of internal weaknesses and external pressures. Competition from supermarkets and online retailers reduced its sales, while the sale and leaseback increased its costs, and the 2008 credit crisis removed the financial support it needed to survive. The key lesson for other businesses is that a strong brand name alone is not enough; firms must continue to offer customers a clear reason to shop with them as markets change.

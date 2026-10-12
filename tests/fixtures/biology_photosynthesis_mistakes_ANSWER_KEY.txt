@@ -1,0 +1,55 @@
+Answer key: biology_photosynthesis_mistakes (DO NOT SUBMIT)
+
+Use this to judge whether the generated quiz questions probe the student's
+misconceptions rather than only restating what they wrote.
+
+SCIENCE MISTAKES (deliberate misconceptions)
+
+ 1. Unbalanced equation: "CO2 + H2O -> C6H12O6 + O2".
+    Correct: 6CO2 + 6H2O -> C6H12O6 + 6O2.
+ 2. "Plants breathe in CO2 and breathe out O2 ... opposite of animals."
+    Photosynthesis is not breathing; plants also exchange gases for respiration.
+ 3. "Plants don't need to respire because they already make their own energy."
+    Plants respire all the time, day and night, to release energy from glucose.
+ 4. "Photosynthesis creates energy" (conclusion).
+    Energy is transferred/converted (light -> chemical), not created.
+ 5. "Chlorophyll is green because it absorbs green light ... plants grow best under green light."
+    Chlorophyll reflects green light; it absorbs mainly red and blue. Plants grow poorly under green light alone.
+ 6. "Most stomata are on the top surface of the leaf."
+    Most are on the lower surface, which reduces water loss.
+ 7. "Glucose is carried away from the leaf by the xylem."
+    Sugars (as sucrose) are transported in the phloem. Xylem carries water and minerals.
+ 8. "The oxygen comes from the carbon dioxide."
+    The oxygen released comes from water, which is split using light energy.
+ 9. "They store glucose as glucose because it is easy to use later."
+    Glucose is stored as insoluble starch (and oils/fats), because glucose is soluble and would affect osmosis.
+10. "Iodine turns from orange-brown to red if starch is present."
+    It turns blue-black.
+11. "Most of a plant's mass comes from the soil ... glucose is mainly used for energy rather than building the plant."
+    Most dry mass comes from carbon dioxide via photosynthesis (glucose -> cellulose, starch, proteins).
+12. "Light intensity ... keeps going up forever."
+    The rate levels off when another factor (CO2, temperature) becomes limiting.
+13. "The hotter it is, the faster photosynthesis will be."
+    Above the optimum, the enzymes denature and the rate falls sharply.
+
+PARTLY RIGHT (good for probing questions)
+
+- The pondweed conclusion is correct, but "lamp heated the water" is an uncontrolled
+  variable with no suggested fix (e.g. a heat shield or a water bath).
+- The CO2 and greenhouse point is correct, but it ignores that CO2 also stops
+  increasing the rate once another factor limits it.
+
+SPELLING / GRAMMAR SLIPS (should NOT dominate the questions)
+
+- "breaths" -> "breathes" (x2)
+- "there own energy" -> "their own energy"
+- "chlorophyl" -> "chlorophyll" (spelled correctly in the next sentence)
+- "recieve" -> "receive"
+
+WHAT A GOOD QUIZ LOOKS LIKE
+
+Questions that ask the student to explain or justify points 3, 5, 8, 11, 12 or 13
+(for example "You said the oxygen comes from carbon dioxide. Explain where the
+oxygen atoms come from") show that the AI is testing understanding. Questions that
+only ask the student to repeat correct statements, or that focus on spelling,
+are weaker results.

@@ -1,0 +1,19 @@
+=== TEST SETUP: delete this block before submitting ===
+Suggested Additional AI prompt (paste into the assignment's Just One More Thing settings):
+Ask challenging questions that make the student defend their overall judgement, weigh the strongest counter-argument, and apply their reasoning to a new example.
+Suggested number of questions: 5
+=== END TEST SETUP ===
+
+What causes river flooding in the UK, and how can it be managed?
+
+A river floods when the discharge, the volume of water flowing past a point, becomes greater than the channel can hold, so water spills onto the floodplain. Flooding in the UK is caused by a combination of physical and human factors, and the case of Storm Desmond in Cumbria in December 2015 shows how these factors can combine. In this essay I will explain the causes of flooding and evaluate how it can be managed.
+
+The most important physical cause is heavy or prolonged rainfall. During Storm Desmond, Honister Pass in Cumbria recorded 341.4 mm of rain in 24 hours, a UK record at the time. When rain falls for a long period, the soil becomes saturated, so infiltration stops and more water travels quickly to the river as surface run-off. Geology also matters: impermeable rock such as granite or clay does not let water soak in, whereas permeable rock such as chalk stores water and slows its release. Steep slopes, which are common in the Lake District, increase the speed of run-off, which shortens the lag time on a flood hydrograph and increases the peak discharge.
+
+Human activity can make flooding worse. Urbanisation replaces soil and vegetation with impermeable surfaces such as tarmac and concrete, and drains carry water directly into rivers, so towns tend to have "flashy" hydrographs with short lag times and high peaks. Deforestation has a similar effect because trees intercept rainfall and take up water through their roots. Building on floodplains does not cause floods, but it greatly increases the damage they do, because more homes and businesses are in the path of the water. In Cumbria, more than 5,000 homes were flooded, and towns such as Carlisle and Keswick were badly affected.
+
+Flooding can be managed using hard engineering or soft engineering. Hard engineering includes flood walls, embankments, dams and flood relief channels. These can protect a specific place very effectively, but they are expensive, can be visually intrusive, and may move the problem downstream. Carlisle had flood defences before 2015, but they were overtopped because the river level was higher than they were designed for, which shows that hard defences only work up to a certain level.
+
+Soft engineering works with natural processes. Examples include afforestation in the upper catchment, restoring wetlands and meanders to slow the flow, and floodplain zoning, which restricts building in high-risk areas. These approaches are usually cheaper and more sustainable, and they benefit wildlife, but they take years to become effective and may not protect a town from an extreme event on their own. Flood warnings from the Environment Agency are another important strategy, because they cannot stop a flood but give people time to move possessions and evacuate.
+
+In conclusion, UK river flooding is mainly triggered by heavy and prolonged rainfall, but human factors such as urbanisation and building on floodplains increase both the likelihood and the impact of floods. The most effective approach is integrated catchment management, which combines soft engineering upstream to slow the flow with targeted hard defences in towns. As climate change is expected to make intense rainfall more frequent, relying on hard defences alone is unlikely to be enough.

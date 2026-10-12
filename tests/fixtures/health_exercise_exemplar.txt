@@ -1,0 +1,21 @@
+=== TEST SETUP: delete this block before submitting ===
+Suggested Additional AI prompt (paste into the assignment's Just One More Thing settings):
+Ask challenging questions that make the student defend their overall judgement, weigh the strongest counter-argument, and apply their reasoning to a new example.
+Suggested number of questions: 5
+=== END TEST SETUP ===
+
+How does exercise affect the body in the short term and the long term?
+
+Exercise places extra demands on the body, because working muscles need more energy. The body responds immediately with short-term changes, and if exercise is repeated regularly over weeks and months, it adapts with long-term changes that make it more efficient. In this essay I will explain both types of effect and why they happen.
+
+In the short term, the most obvious change is an increase in heart rate. Muscles need more oxygen for aerobic respiration, which releases energy from glucose: glucose + oxygen → carbon dioxide + water. To deliver more oxygen and remove more carbon dioxide, the heart beats faster and stroke volume, the amount of blood pumped per beat, increases. Together these increase cardiac output. At the same time, breathing rate and depth increase so that more oxygen diffuses into the blood in the alveoli and more carbon dioxide is breathed out. Blood is also redirected towards working muscles and away from organs such as the digestive system.
+
+During intense exercise, such as a 400 m sprint, the heart and lungs cannot supply oxygen quickly enough, so muscles also respire anaerobically: glucose → lactic acid. Anaerobic respiration releases energy quickly but much less efficiently, and the build-up of lactic acid contributes to muscle fatigue. After exercise, breathing and heart rate stay high for a while to repay the oxygen debt, the extra oxygen needed to break down lactic acid. Body temperature also rises, so the body sweats and blood vessels near the skin widen to transfer heat away.
+
+In the long term, regular training causes the body to adapt. The heart muscle becomes larger and stronger, which is called cardiac hypertrophy, so stroke volume increases. This means the heart can pump the same amount of blood with fewer beats, so resting heart rate falls; trained endurance athletes can have resting heart rates below 50 beats per minute. Regular exercise also increases capillarisation, the number of capillaries around the muscles and alveoli, which improves gas exchange. The respiratory muscles, the diaphragm and intercostals, become stronger, so breathing becomes more efficient.
+
+Muscles and bones adapt too. Resistance training causes muscle hypertrophy, an increase in the size of muscle fibres, which increases strength. Weight-bearing exercise, such as running, increases bone density, which lowers the risk of osteoporosis later in life. Regular exercise also improves the body's ability to use fat as a fuel and helps to control body weight, blood pressure and blood glucose, which reduces the risk of type 2 diabetes and heart disease.
+
+It is important to note that these long-term benefits depend on the principles of training. The body only adapts if exercise is progressive, gradually increasing in difficulty, and if there is enough rest for recovery. Overtraining without rest increases the risk of injury and can reduce performance. The benefits are also reversible: if a person stops exercising, many of these adaptations are gradually lost.
+
+In conclusion, the short-term effects of exercise are the body's immediate response to an increased demand for oxygen and energy, while the long-term effects are adaptations that make the cardiovascular, respiratory and muscular systems more efficient. Both are linked, because it is repeated short-term stress, combined with rest, that produces long-term improvement.
