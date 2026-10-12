@@ -442,6 +442,91 @@ final class create_quiz_test extends advanced_testcase {
     }
 
     /**
+     * The per-assignment prompt is placed after the default prompt and before the submission.
+     */
+    public function test_build_ai_prompt_includes_additional_prompt(): void {
+        set_config('default_ai_prompt', 'Generate {numquestions} questions.', 'local_jomot');
+
+        $method = new \ReflectionMethod(create_quiz::class, 'build_ai_prompt');
+        $prompt = $method->invoke(null, 'Student essay text', 3, 'Focus on the methodology section.');
+
+        $this->assertStringStartsWith('Generate 3 questions.', $prompt);
+        $extrapos      = strpos($prompt, 'Focus on the methodology section.');
+        $submissionpos = strpos($prompt, '<<<SUBMISSION_START>>>');
+        $this->assertNotFalse($extrapos, 'additional prompt must be included');
+        $this->assertNotFalse($submissionpos);
+        $this->assertLessThan($submissionpos, $extrapos, 'additional prompt must precede the submission');
+    }
+
+    /**
+     * With no per-assignment prompt, no teacher-instructions section is added.
+     */
+    public function test_build_ai_prompt_without_additional_prompt(): void {
+        set_config('default_ai_prompt', 'Generate {numquestions} questions.', 'local_jomot');
+
+        $method = new \ReflectionMethod(create_quiz::class, 'build_ai_prompt');
+        $prompt = $method->invoke(null, 'Student essay text', 2, '');
+
+        $this->assertStringNotContainsString('Additional instructions from the teacher', $prompt);
+        $this->assertStringContainsString('Student essay text', $prompt);
+    }
+
+    /**
+     * The observer passes the assignment's additional prompt to the queued task.
+     */
+    public function test_observer_passes_additional_prompt_to_task(): void {
+        global $DB;
+
+        $generator = $this->getDataGenerator();
+        $student   = $generator->create_user();
+        $generator->enrol_user($student->id, $this->course->id, 'student');
+
+        $assign = $generator->create_module('assign', ['course' => $this->course->id]);
+        $config = $DB->get_record('local_jomot_assign_config', ['assignmentid' => $assign->id]);
+        if ($config) {
+            $config->enable_quiz = 1;
+            $config->prompt      = 'Ask about the conclusion.';
+            $DB->update_record('local_jomot_assign_config', $config);
+        } else {
+            $DB->insert_record('local_jomot_assign_config', (object) [
+                'assignmentid' => $assign->id,
+                'enable_quiz'  => 1,
+                'numquestions' => 1,
+                'prompt'       => 'Ask about the conclusion.',
+                'timecreated'  => time(),
+                'timemodified' => time(),
+            ]);
+        }
+
+        $cm      = get_coursemodule_from_instance('assign', $assign->id, $this->course->id, false, MUST_EXIST);
+        $context = \context_module::instance($cm->id);
+
+        $submissionid = $DB->insert_record('assign_submission', (object) [
+            'assignment'    => $assign->id,
+            'userid'        => $student->id,
+            'timecreated'   => time(),
+            'timemodified'  => time(),
+            'status'        => 'submitted',
+            'groupid'       => 0,
+            'attemptnumber' => 0,
+            'latest'        => 1,
+        ]);
+
+        $event = \mod_assign\event\assessable_submitted::create([
+            'context'  => $context,
+            'objectid' => $submissionid,
+            'userid'   => $student->id,
+            'other'    => ['submission_editable' => false],
+        ]);
+        $event->set_assign(new \assign($context, $cm, $this->course));
+        $event->trigger();
+
+        $tasks = \core\task\manager::get_adhoc_tasks(\local_jomot\task\create_quiz_adhoc::class);
+        $this->assertCount(1, $tasks);
+        $this->assertSame('Ask about the conclusion.', reset($tasks)->get_custom_data()->prompt);
+    }
+
+    /**
      * The quiz must have a first section row created in quiz_sections.
      */
     public function test_quiz_section_created(): void {

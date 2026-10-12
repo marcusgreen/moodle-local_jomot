@@ -69,6 +69,7 @@ class create_quiz_adhoc extends \core\task\adhoc_task {
                 'templatequiz'     => (int) ($data->templatequiz ?? 0),
                 'useremail'        => $user->email,
                 'visible'          => (int) ($data->quizvisible ?? 0),
+                'prompt'           => (string) ($data->prompt ?? ''),
             ],
             $result['text'],
             (int) ($data->numquestions ?? \local_jomot\constants::DEFAULT_NUMQUESTIONS)
