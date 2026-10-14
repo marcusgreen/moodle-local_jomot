@@ -15,6 +15,8 @@ Each quiz:
 
 - Moodle 5.0 or later
 - The **AIText** question type (`qtype_aitext`) installed
+- The **AI Content Manager** plugin ([`local_ai_content`](https://github.com/bycs-lp/moodle-local_ai_content))
+  installed, for extracting text from submitted files
 - The AI bridge tool (`tool_ai_bridge`) and a connection to an external LLM enabled on your site
 - The plugin installed by an admin (**Site administration → Notifications**)
 
