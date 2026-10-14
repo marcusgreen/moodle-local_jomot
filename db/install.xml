@@ -13,6 +13,8 @@
         <FIELD NAME="quizvisible" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" COMMENT="Whether generated quizzes are visible to students immediately"/>
         <FIELD NAME="prompt" TYPE="text" NOTNULL="false" COMMENT="Additional prompt appended to the default AI prompt"/>
         <FIELD NAME="templatequiz" TYPE="int" LENGTH="10" NOTNULL="false" DEFAULT="0" COMMENT="Quiz instance id whose settings are copied into generated quizzes (0 = none)"/>
+        <FIELD NAME="questionmark" TYPE="number" LENGTH="12" NOTNULL="true" DEFAULT="1" DECIMALS="7" COMMENT="Maximum mark for each AI-generated question"/>
+        <FIELD NAME="quizgrade" TYPE="number" LENGTH="10" NOTNULL="false" DECIMALS="5" COMMENT="Maximum grade for the generated quiz (null = template or plugin default)"/>
         <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
         <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
       </FIELDS>

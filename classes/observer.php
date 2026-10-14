@@ -63,6 +63,8 @@ class observer {
             'templatequiz'   => (int) ($config->templatequiz ?? 0),
             'quizvisible'    => (int) ($config->quizvisible ?? 0),
             'prompt'         => (string) ($config->prompt ?? ''),
+            'questionmark'   => (float) ($config->questionmark ?? 1) ?: 1.0,
+            'quizgrade'      => isset($config->quizgrade) ? (float) $config->quizgrade : null,
         ]);
         \core\task\manager::queue_adhoc_task($task);
     }

@@ -83,5 +83,21 @@ function xmldb_local_jomot_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026092400, 'local', 'jomot');
     }
 
+    if ($oldversion < 2026101400) {
+        $table = new xmldb_table('local_jomot_assign_config');
+
+        $field = new xmldb_field('questionmark', XMLDB_TYPE_NUMBER, '12, 7', null, XMLDB_NOTNULL, null, '1', 'templatequiz');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        $field = new xmldb_field('quizgrade', XMLDB_TYPE_NUMBER, '10, 5', null, null, null, null, 'questionmark');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        upgrade_plugin_savepoint(true, 2026101400, 'local', 'jomot');
+    }
+
     return true;
 }

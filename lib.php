@@ -75,6 +75,28 @@ function local_jomot_coursemodule_standard_elements($formwrapper, $mform) {
     $mform->addHelpButton('local_jomot_templatequiz', 'templatequiz', 'local_jomot');
     $mform->hideIf('local_jomot_templatequiz', 'local_jomot_enable_quiz', 'eq', 0);
 
+    $mform->addElement(
+        'text',
+        'local_jomot_questionmark',
+        get_string('questionmark_label', 'local_jomot'),
+        ['size' => 6]
+    );
+    $mform->setType('local_jomot_questionmark', PARAM_RAW_TRIMMED);
+    $mform->setDefault('local_jomot_questionmark', 1);
+    $mform->addHelpButton('local_jomot_questionmark', 'questionmark', 'local_jomot');
+    $mform->hideIf('local_jomot_questionmark', 'local_jomot_enable_quiz', 'eq', 0);
+
+    $mform->addElement(
+        'text',
+        'local_jomot_quizgrade',
+        get_string('quizgrade_label', 'local_jomot'),
+        ['size' => 6]
+    );
+    $mform->setType('local_jomot_quizgrade', PARAM_RAW_TRIMMED);
+    $mform->setDefault('local_jomot_quizgrade', '');
+    $mform->addHelpButton('local_jomot_quizgrade', 'quizgrade', 'local_jomot');
+    $mform->hideIf('local_jomot_quizgrade', 'local_jomot_enable_quiz', 'eq', 0);
+
     // Override defaults with saved values when editing an existing assignment.
     $update = optional_param('update', 0, PARAM_INT);
     if ($update) {
@@ -87,6 +109,9 @@ function local_jomot_coursemodule_standard_elements($formwrapper, $mform) {
                 $mform->setDefault('local_jomot_quizvisible', (int)$config->quizvisible);
                 $mform->setDefault('local_jomot_prompt', $config->prompt ?? '');
                 $mform->setDefault('local_jomot_templatequiz', (int)($config->templatequiz ?? 0));
+                $mform->setDefault('local_jomot_questionmark', format_float((float)($config->questionmark ?? 1), -1));
+                $quizgrade = $config->quizgrade === null ? '' : format_float((float)$config->quizgrade, -1);
+                $mform->setDefault('local_jomot_quizgrade', $quizgrade);
             }
         }
     }
@@ -144,6 +169,36 @@ function local_jomot_get_template_quizzes(int $courseid): array {
 }
 
 /**
+ * Hook to validate the Just One More Thing fields on the assignment settings form.
+ *
+ * @param \moodleform_mod $formwrapper
+ * @param array $data Submitted form data.
+ * @return array Errors keyed by element name.
+ */
+function local_jomot_coursemodule_validation($formwrapper, $data) {
+    $errors = [];
+
+    if (($data['modulename'] ?? '') !== 'assign' || empty($data['local_jomot_enable_quiz'])) {
+        return $errors;
+    }
+
+    $questionmark = unformat_float($data['local_jomot_questionmark'] ?? '', true);
+    if ($questionmark === false || $questionmark === null || $questionmark <= 0) {
+        $errors['local_jomot_questionmark'] = get_string('err_questionmark', 'local_jomot');
+    }
+
+    $quizgrade = trim((string)($data['local_jomot_quizgrade'] ?? ''));
+    if ($quizgrade !== '') {
+        $quizgrade = unformat_float($quizgrade, true);
+        if ($quizgrade === false || $quizgrade < 0) {
+            $errors['local_jomot_quizgrade'] = get_string('err_quizgrade', 'local_jomot');
+        }
+    }
+
+    return $errors;
+}
+
+/**
  * Hook to save Just One More Thing settings after the assignment form is submitted.
  *
  * @param \stdClass $data
@@ -165,6 +220,16 @@ function local_jomot_coursemodule_edit_post_actions($data, $course) {
     $quizvisible = isset($data->local_jomot_quizvisible) ? (int)$data->local_jomot_quizvisible : 0;
     $prompt      = isset($data->local_jomot_prompt) ? clean_param($data->local_jomot_prompt, PARAM_TEXT) : '';
     $templatequiz = isset($data->local_jomot_templatequiz) ? (int)$data->local_jomot_templatequiz : 0;
+    $questionmark = unformat_float($data->local_jomot_questionmark ?? '', true);
+    if (!$questionmark || $questionmark <= 0) {
+        $questionmark = 1.0;
+    }
+    // An empty grade means "use the template quiz grade, or the plugin default".
+    $quizgrade = trim((string)($data->local_jomot_quizgrade ?? ''));
+    $quizgrade = $quizgrade === '' ? null : unformat_float($quizgrade, true);
+    if ($quizgrade === false || ($quizgrade !== null && $quizgrade < 0)) {
+        $quizgrade = null;
+    }
 
     $existing = $DB->get_record('local_jomot_assign_config', ['assignmentid' => $data->instance]);
 
@@ -174,6 +239,8 @@ function local_jomot_coursemodule_edit_post_actions($data, $course) {
         $existing->quizvisible   = $quizvisible;
         $existing->prompt        = $prompt;
         $existing->templatequiz  = $templatequiz;
+        $existing->questionmark  = $questionmark;
+        $existing->quizgrade     = $quizgrade;
         $existing->timemodified  = time();
         $DB->update_record('local_jomot_assign_config', $existing);
     } else {
@@ -184,6 +251,8 @@ function local_jomot_coursemodule_edit_post_actions($data, $course) {
             'quizvisible'  => $quizvisible,
             'prompt'       => $prompt,
             'templatequiz' => $templatequiz,
+            'questionmark' => $questionmark,
+            'quizgrade'    => $quizgrade,
             'timecreated'  => time(),
             'timemodified' => time(),
         ]);

@@ -249,12 +249,16 @@ class create_quiz extends external_api {
 
         $course = $DB->get_record('course', ['id' => $courseid], '*', MUST_EXIST);
 
-        // The templatequiz (a quiz instance id) and prompt (extra AI instructions) are
-        // meta-overrides, not build_moduleinfo fields, so pull them out before
-        // merging the build parameters.
+        // The templatequiz (a quiz instance id), prompt (extra AI instructions) and
+        // questionmark (max mark per AI question) are meta-overrides, not
+        // build_moduleinfo fields, so pull them out before merging the build parameters.
         $templatequiz = (int) ($overrides['templatequiz'] ?? 0);
         $extraprompt  = trim((string) ($overrides['prompt'] ?? ''));
-        unset($overrides['templatequiz'], $overrides['prompt']);
+        $questionmark = (float) ($overrides['questionmark'] ?? 1.0);
+        if ($questionmark <= 0) {
+            $questionmark = 1.0;
+        }
+        unset($overrides['templatequiz'], $overrides['prompt'], $overrides['questionmark']);
 
         $params = array_merge([
             'courseid'           => $courseid,
@@ -296,6 +300,10 @@ class create_quiz extends external_api {
         $moduleinfo = self::build_moduleinfo($params, $course);
         if ($templatequiz) {
             self::apply_template_to_moduleinfo($moduleinfo, $templatequiz);
+            // An explicitly requested grade wins over the template's grade.
+            if (array_key_exists('grade', $overrides)) {
+                $moduleinfo->grade = $params['grade'];
+            }
         }
         $moduleinfo = add_moduleinfo($moduleinfo, $course);
 
@@ -306,7 +314,7 @@ class create_quiz extends external_api {
             self::copy_template_questions($newquiz, $templatequiz);
         }
 
-        self::add_questions_to_quiz((int) $moduleinfo->instance, $moduleinfo->name, $questions);
+        self::add_questions_to_quiz((int) $moduleinfo->instance, $moduleinfo->name, $questions, $questionmark);
 
         \local_jomot\event\quiz_created::create([
             'context'  => \context_course::instance($courseid),
@@ -401,13 +409,20 @@ class create_quiz extends external_api {
      * Writes pre-parsed question data to the quiz. Called only after quiz creation succeeds.
      *
      * @param list<array{questiontext: string, aiprompt: string}> $questions
+     * @param float $questionmark Maximum mark for each question.
      */
-    private static function add_questions_to_quiz(int $quizid, string $quizname, array $questions): void {
+    private static function add_questions_to_quiz(
+        int $quizid,
+        string $quizname,
+        array $questions,
+        float $questionmark = 1.0
+    ): void {
         foreach ($questions as $i => $q) {
             add_question::add_to_quiz($quizid, [
                 'name'         => $quizname . ' Q' . ($i + 1),
                 'questiontext' => $q['questiontext'],
                 'aiprompt'     => $q['aiprompt'],
+                'defaultmark'  => $questionmark,
             ]);
         }
     }

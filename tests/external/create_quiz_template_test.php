@@ -127,6 +127,37 @@ final class create_quiz_template_test extends advanced_testcase {
     }
 
     /**
+     * Without a grade override the generated quiz takes the template's grade.
+     */
+    public function test_template_grade_is_used_by_default(): void {
+        global $DB;
+
+        $template = $this->make_template_quiz(1);
+
+        $result = create_quiz::create($this->course->id, 'Student Quiz', [
+            'templatequiz' => $template->id,
+        ]);
+
+        $this->assertEquals(100.0, (float) $DB->get_field('quiz', 'grade', ['id' => $result['quizid']]));
+    }
+
+    /**
+     * An explicit grade override wins over the template's grade.
+     */
+    public function test_grade_override_wins_over_template(): void {
+        global $DB;
+
+        $template = $this->make_template_quiz(1);
+
+        $result = create_quiz::create($this->course->id, 'Student Quiz', [
+            'templatequiz' => $template->id,
+            'grade'        => 25.0,
+        ]);
+
+        $this->assertEquals(25.0, (float) $DB->get_field('quiz', 'grade', ['id' => $result['quizid']]));
+    }
+
+    /**
      * A template with no questions yields a quiz with no slots and no error.
      */
     public function test_empty_template_copies_nothing(): void {

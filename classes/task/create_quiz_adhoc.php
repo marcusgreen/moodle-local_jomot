@@ -61,16 +61,24 @@ class create_quiz_adhoc extends \core\task\adhoc_task {
             mtrace("local_jomot: WARNING file '{$skipped['filename']}' excluded ({$skipped['reason']}).");
         }
 
+        $overrides = [
+            'questionsperpage' => \local_jomot\constants::DEFAULT_QUESTIONSPERPAGE,
+            'templatequiz'     => (int) ($data->templatequiz ?? 0),
+            'useremail'        => $user->email,
+            'visible'          => (int) ($data->quizvisible ?? 0),
+            'prompt'           => (string) ($data->prompt ?? ''),
+            'questionmark'     => (float) ($data->questionmark ?? 1),
+        ];
+        // Only override the grade when the teacher set one; otherwise the template
+        // quiz grade (or the plugin default) applies.
+        if (isset($data->quizgrade)) {
+            $overrides['grade'] = (float) $data->quizgrade;
+        }
+
         \local_jomot\external\create_quiz::create(
             (int) $data->courseid,
             $data->assignmentname,
-            [
-                'questionsperpage' => \local_jomot\constants::DEFAULT_QUESTIONSPERPAGE,
-                'templatequiz'     => (int) ($data->templatequiz ?? 0),
-                'useremail'        => $user->email,
-                'visible'          => (int) ($data->quizvisible ?? 0),
-                'prompt'           => (string) ($data->prompt ?? ''),
-            ],
+            $overrides,
             $result['text'],
             (int) ($data->numquestions ?? \local_jomot\constants::DEFAULT_NUMQUESTIONS)
         );

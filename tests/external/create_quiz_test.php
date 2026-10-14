@@ -472,7 +472,8 @@ final class create_quiz_test extends advanced_testcase {
     }
 
     /**
-     * The observer passes the assignment's additional prompt to the queued task.
+     * The observer passes the assignment's additional prompt, question mark and
+     * quiz grade to the queued task.
      */
     public function test_observer_passes_additional_prompt_to_task(): void {
         global $DB;
@@ -485,7 +486,9 @@ final class create_quiz_test extends advanced_testcase {
         $config = $DB->get_record('local_jomot_assign_config', ['assignmentid' => $assign->id]);
         if ($config) {
             $config->enable_quiz = 1;
-            $config->prompt      = 'Ask about the conclusion.';
+            $config->prompt       = 'Ask about the conclusion.';
+            $config->questionmark = 2.5;
+            $config->quizgrade    = 50;
             $DB->update_record('local_jomot_assign_config', $config);
         } else {
             $DB->insert_record('local_jomot_assign_config', (object) [
@@ -493,6 +496,8 @@ final class create_quiz_test extends advanced_testcase {
                 'enable_quiz'  => 1,
                 'numquestions' => 1,
                 'prompt'       => 'Ask about the conclusion.',
+                'questionmark' => 2.5,
+                'quizgrade'    => 50,
                 'timecreated'  => time(),
                 'timemodified' => time(),
             ]);
@@ -523,7 +528,32 @@ final class create_quiz_test extends advanced_testcase {
 
         $tasks = \core\task\manager::get_adhoc_tasks(\local_jomot\task\create_quiz_adhoc::class);
         $this->assertCount(1, $tasks);
-        $this->assertSame('Ask about the conclusion.', reset($tasks)->get_custom_data()->prompt);
+        $data = reset($tasks)->get_custom_data();
+        $this->assertSame('Ask about the conclusion.', $data->prompt);
+        $this->assertEquals(2.5, $data->questionmark);
+        $this->assertEquals(50.0, $data->quizgrade);
+    }
+
+    /**
+     * AI-generated questions are added with the requested maximum mark.
+     */
+    public function test_add_questions_to_quiz_uses_question_mark(): void {
+        global $DB;
+
+        $result = create_quiz::create($this->course->id, 'Marked Quiz');
+
+        $method = new \ReflectionMethod(create_quiz::class, 'add_questions_to_quiz');
+        $method->invoke(null, $result['quizid'], 'Marked Quiz', [
+            ['questiontext' => 'Explain your method.', 'aiprompt' => 'Grade it.'],
+            ['questiontext' => 'Justify your conclusion.', 'aiprompt' => 'Grade it.'],
+        ], 2.5);
+
+        $maxmarks = $DB->get_fieldset_select('quiz_slots', 'maxmark', 'quizid = ?', [$result['quizid']]);
+        $this->assertCount(2, $maxmarks);
+        foreach ($maxmarks as $m) {
+            $this->assertEquals(2.5, (float) $m);
+        }
+        $this->assertEquals(5.0, (float) $DB->get_field('quiz', 'sumgrades', ['id' => $result['quizid']]));
     }
 
     /**
