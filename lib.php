@@ -22,8 +22,6 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Hook to add elements to the assignment settings form.
  *
@@ -39,37 +37,57 @@ function local_jomot_coursemodule_standard_elements($formwrapper, $mform) {
 
     $mform->addElement('header', 'local_jomot_header', get_string('pluginname', 'local_jomot'));
 
-    $mform->addElement('advcheckbox', 'local_jomot_enable_quiz',
+    $mform->addElement(
+        'advcheckbox',
+        'local_jomot_enable_quiz',
         get_string('enable_quiz_label', 'local_jomot'),
         get_string('enable_quiz_desc', 'local_jomot'),
-        ['group' => 1], [0, 1]);
+        ['group' => 1],
+        [0, 1]
+    );
 
     $mform->addHelpButton('local_jomot_enable_quiz', 'enable_quiz', 'local_jomot');
 
-    $mform->addElement('text', 'local_jomot_numquestions',
-        get_string('numquestions_label', 'local_jomot'), ['size' => 4]);
+    $mform->addElement(
+        'text',
+        'local_jomot_numquestions',
+        get_string('numquestions_label', 'local_jomot'),
+        ['size' => 4]
+    );
     $mform->setType('local_jomot_numquestions', PARAM_INT);
     $mform->setDefault('local_jomot_numquestions', \local_jomot\constants::DEFAULT_NUMQUESTIONS);
     $mform->hideIf('local_jomot_numquestions', 'local_jomot_enable_quiz', 'eq', 0);
 
-    $mform->addElement('advcheckbox', 'local_jomot_quizvisible',
+    $mform->addElement(
+        'advcheckbox',
+        'local_jomot_quizvisible',
         get_string('quizvisible_label', 'local_jomot'),
         get_string('quizvisible_desc', 'local_jomot'),
-        ['group' => 1], [0, 1]);
+        ['group' => 1],
+        [0, 1]
+    );
     $mform->setDefault('local_jomot_quizvisible', 0);
     $mform->addHelpButton('local_jomot_quizvisible', 'quizvisible', 'local_jomot');
     $mform->hideIf('local_jomot_quizvisible', 'local_jomot_enable_quiz', 'eq', 0);
 
-    $mform->addElement('textarea', 'local_jomot_prompt',
-        get_string('prompt_label', 'local_jomot'), ['rows' => 4, 'cols' => 50]);
+    $mform->addElement(
+        'textarea',
+        'local_jomot_prompt',
+        get_string('prompt_label', 'local_jomot'),
+        ['rows' => 4, 'cols' => 50]
+    );
     $mform->setType('local_jomot_prompt', PARAM_TEXT);
     $mform->addHelpButton('local_jomot_prompt', 'prompt', 'local_jomot');
     $mform->hideIf('local_jomot_prompt', 'local_jomot_enable_quiz', 'eq', 0);
 
     $quizoptions = [0 => get_string('templatequiz_none', 'local_jomot')]
         + local_jomot_get_template_quizzes((int)$formwrapper->get_course()->id);
-    $mform->addElement('select', 'local_jomot_templatequiz',
-        get_string('templatequiz_label', 'local_jomot'), $quizoptions);
+    $mform->addElement(
+        'select',
+        'local_jomot_templatequiz',
+        get_string('templatequiz_label', 'local_jomot'),
+        $quizoptions
+    );
     $mform->setType('local_jomot_templatequiz', PARAM_INT);
     $mform->setDefault('local_jomot_templatequiz', 0);
     $mform->addHelpButton('local_jomot_templatequiz', 'templatequiz', 'local_jomot');
@@ -105,7 +123,10 @@ function local_jomot_coursemodule_standard_elements($formwrapper, $mform) {
             $config = $DB->get_record('local_jomot_assign_config', ['assignmentid' => $cm->instance]);
             if ($config) {
                 $mform->setDefault('local_jomot_enable_quiz', (int)$config->enable_quiz);
-                $mform->setDefault('local_jomot_numquestions', max(1, (int)$config->numquestions ?: \local_jomot\constants::DEFAULT_NUMQUESTIONS));
+                $mform->setDefault(
+                    'local_jomot_numquestions',
+                    max(1, (int)$config->numquestions ?: \local_jomot\constants::DEFAULT_NUMQUESTIONS)
+                );
                 $mform->setDefault('local_jomot_quizvisible', (int)$config->quizvisible);
                 $mform->setDefault('local_jomot_prompt', $config->prompt ?? '');
                 $mform->setDefault('local_jomot_templatequiz', (int)($config->templatequiz ?? 0));
@@ -215,7 +236,7 @@ function local_jomot_coursemodule_edit_post_actions($data, $course) {
     $enablequiz   = isset($data->local_jomot_enable_quiz) ? (int)$data->local_jomot_enable_quiz : 0;
     $numquestions = min(
         \local_jomot\constants::MAX_NUMQUESTIONS,
-        max(1, isset($data->local_jomot_numquestions) ? (int)$data->local_jomot_numquestions : \local_jomot\constants::DEFAULT_NUMQUESTIONS)
+        max(1, (int)($data->local_jomot_numquestions ?? \local_jomot\constants::DEFAULT_NUMQUESTIONS))
     );
     $quizvisible = isset($data->local_jomot_quizvisible) ? (int)$data->local_jomot_quizvisible : 0;
     $prompt      = isset($data->local_jomot_prompt) ? clean_param($data->local_jomot_prompt, PARAM_TEXT) : '';

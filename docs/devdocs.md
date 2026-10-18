@@ -25,8 +25,9 @@ under cron, never during the student's submission request.
 | Component | Used for | Where |
 |---|---|---|
 | `local_ai_content` | Extracting text from submitted files (with caching) | `classes/submission_extractor.php` |
-| `tool_ai_bridge` | Sending the question-generation prompt to the LLM | `create_quiz::fetch_ai_questions()` |
-| `qtype_aitext` | Question type of generated questions; its `backend` setting picks the AI backend | `add_question::add_to_quiz()`, `create_quiz::fetch_ai_questions()` |
+| `tool_ai_bridge` (optional) | Sending the question-generation prompt to the LLM; without it the core AI subsystem is called directly | `create_quiz::perform_ai_request()` |
+| `qtype_aitext` | Question type of generated questions | `add_question::add_to_quiz()` |
+| `local_ai_manager` (optional) | Alternative AI backend, chosen in the plugin settings | `create_quiz::perform_ai_request()` |
 | `tool_aiconnect` | Default model name when none is given for a question | `add_question::add_to_quiz()` |
 | Site document converter | Converting office documents to text (via `local_ai_content`) | See [`../fileconversion_shim.md`](../fileconversion_shim.md) |
 
@@ -244,7 +245,10 @@ Plugin defaults set by `build_moduleinfo()` (unless a template overrides them):
    prompt-injection guard; keep the submission last and do not remove it.
 
 The request goes through `\tool_ai_bridge\ai_bridge` in the course context, using
-the backend configured for `qtype_aitext` (`core_ai_subsystem` if unset).
+the `local_jomot/backend` setting: `core_ai_subsystem` (default) or `local_ai_manager`
+(offered only when installed; uses its `questiongeneration` purpose). When
+`tool_ai_bridge` is not installed, `create_quiz::perform_ai_request()` calls the chosen
+backend directly.
 
 `parse_ai_questions_response()` strips markdown code fences and accepts:
 

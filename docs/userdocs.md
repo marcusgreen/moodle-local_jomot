@@ -17,7 +17,10 @@ Each quiz:
 - The **AIText** question type (`qtype_aitext`) installed
 - The **AI Content Manager** plugin ([`local_ai_content`](https://github.com/bycs-lp/moodle-local_ai_content))
   installed, for extracting text from submitted files
-- The AI bridge tool (`tool_ai_bridge`) and a connection to an external LLM enabled on your site
+- An AI provider for question generation, picked in the plugin's **AI backend** setting: a provider
+  enabled in Moodle's core AI subsystem (**Site administration → AI**), or the AI manager
+  (`local_ai_manager`) if installed. The AI bridge tool (`tool_ai_bridge`) is used when installed but
+  is optional.
 - The plugin installed by an admin (**Site administration → Notifications**)
 
 ## Enabling it on an assignment

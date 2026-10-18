@@ -8,7 +8,7 @@ Feature: Just One More Thing admin settings
     Given I log in as "admin"
     And I navigate to "Plugins > Local plugins > Just One More Thing" in site administration
     Then I should see "Default AI prompt"
-    And I should see "Generate {numquestions} multiple choice questions"
+    And I should see "Generate {numquestions} questions that test whether the student genuinely understands"
     When I set the field "s_local_jomot_default_ai_prompt" to "Create {numquestions} questions from this text."
     And I press "Save changes"
     Then I should see "Changes saved"

@@ -271,7 +271,8 @@ final class create_quiz_test extends advanced_testcase {
             'courseid'       => $this->course->id,
             'userid'         => $student->id,
             'assignmentname' => 'Essay',
-            'submissiontext' => '',
+            'contextid'      => 0,
+            'submissionid'   => 0,
             'numquestions'   => 1,
             'templatequiz'   => 0,
         ]);
@@ -386,7 +387,7 @@ final class create_quiz_test extends advanced_testcase {
         $this->assertSame('isequalto', $condition['op']);
         $this->assertSame($student->email, $condition['v'], 'quiz must be locked to the submitting student email');
 
-        // quizvisible = 1 in config must make the generated quiz visible.
+        // A quizvisible of 1 in config must make the generated quiz visible.
         $this->assertEquals(1, $quizcm->visible, 'quiz must be visible when quizvisible is enabled');
     }
 
@@ -408,7 +409,8 @@ final class create_quiz_test extends advanced_testcase {
             'courseid'       => $this->course->id,
             'userid'         => $student->id,
             'assignmentname' => 'Visible',
-            'submissiontext' => '',
+            'contextid'      => 0,
+            'submissionid'   => 0,
             'numquestions'   => 1,
             'templatequiz'   => 0,
             'quizvisible'    => 1,
@@ -427,7 +429,8 @@ final class create_quiz_test extends advanced_testcase {
             'courseid'       => $this->course->id,
             'userid'         => $student->id,
             'assignmentname' => 'Hidden',
-            'submissiontext' => '',
+            'contextid'      => 0,
+            'submissionid'   => 0,
             'numquestions'   => 1,
             'templatequiz'   => 0,
             'quizvisible'    => 0,

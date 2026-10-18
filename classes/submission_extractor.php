@@ -63,7 +63,7 @@ class submission_extractor {
      *
      * @param string $onlinetext Online text submission (plain).
      * @param string $filetext Extracted text from files (plain).
-     * @param list<array{filename: string, reason: string}> $skippedfiles Files that could not be read.
+     * @param array $skippedfiles Files that could not be read, each ['filename' => string, 'reason' => string].
      * @return string The combined submission text.
      */
     private function build_structured_submission(string $onlinetext, string $filetext, array $skippedfiles): string {
@@ -127,7 +127,13 @@ class submission_extractor {
 
             $filename = $file->get_filename();
 
-            if (!$extractor->is_file_supported($file)) {
+            try {
+                $supported = $extractor->is_file_supported($file);
+            } catch (\moodle_exception $e) {
+                // Thrown when local_ai_content has no usable AI backend; only plain text can be read then.
+                $supported = false;
+            }
+            if (!$supported) {
                 mtrace("local_jomot: file '{$filename}' ({$file->get_mimetype()}) is not supported - skipping.");
                 $skippedfiles[] = ['filename' => $filename, 'reason' => 'skipreason_conversionnotsupported'];
                 continue;

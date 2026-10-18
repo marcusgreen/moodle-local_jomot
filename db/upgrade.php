@@ -22,8 +22,12 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
-
+/**
+ * Upgrades the local_jomot plugin.
+ *
+ * @param int $oldversion The version being upgraded from.
+ * @return bool
+ */
 function xmldb_local_jomot_upgrade($oldversion) {
     global $DB;
     $dbman = $DB->get_manager();

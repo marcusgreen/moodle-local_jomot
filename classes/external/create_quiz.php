@@ -239,9 +239,17 @@ class create_quiz extends external_api {
      * @param int    $courseid
      * @param string $name
      * @param array  $overrides  Optional subset of build_moduleinfo params to override defaults.
+     * @param string $submissiontext Student submission text; empty means no AI questions.
+     * @param int    $numquestions Number of AI questions to generate.
      * @return array{cmid: int, quizid: int, name: string}
      */
-    public static function create(int $courseid, string $name, array $overrides = [], string $submissiontext = '', int $numquestions = constants::DEFAULT_NUMQUESTIONS): array {
+    public static function create(
+        int $courseid,
+        string $name,
+        array $overrides = [],
+        string $submissiontext = '',
+        int $numquestions = constants::DEFAULT_NUMQUESTIONS
+    ): array {
         global $CFG, $DB;
 
         require_once($CFG->dirroot . '/course/modlib.php');
@@ -362,14 +370,74 @@ class create_quiz extends external_api {
     ): array {
         $prompt = self::build_ai_prompt($submissiontext, $numquestions, $extraprompt);
 
-        $backend  = get_config('qtype_aitext', 'backend') ?: 'core_ai_subsystem';
-        $context  = context_course::instance($courseid);
-        $aibridge = new \tool_ai_bridge\ai_bridge($context->id, $backend);
-
-        $airesponse = $aibridge->perform_request($prompt);
+        $context    = context_course::instance($courseid);
+        $airesponse = self::perform_ai_request($context->id, $prompt);
         $questions  = self::parse_ai_questions_response($airesponse);
 
         return array_slice($questions, 0, $numquestions);
+    }
+
+    /**
+     * Sends a prompt to the AI and returns the response text.
+     *
+     * The backend comes from the local_jomot/backend setting: the core AI subsystem,
+     * or local_ai_manager when it is installed. Requests go through tool_ai_bridge
+     * when that is installed, otherwise straight to the chosen backend.
+     *
+     * @param int    $contextid Context the request is made in.
+     * @param string $prompt
+     * @return string
+     * @throws \moodle_exception On AI failure or an empty response.
+     */
+    private static function perform_ai_request(int $contextid, string $prompt): string {
+        global $USER;
+
+        $backend = get_config('local_jomot', 'backend') ?: 'core_ai_subsystem';
+        if ($backend === 'local_ai_manager' && !class_exists(\local_ai_manager\manager::class)) {
+            $backend = 'core_ai_subsystem';
+        }
+
+        if (class_exists(\tool_ai_bridge\ai_bridge::class)) {
+            $aibridge = new \tool_ai_bridge\ai_bridge($contextid, 'local_jomot', $backend);
+            return $aibridge->perform_request($prompt, 'questiongeneration');
+        }
+
+        if ($backend === 'local_ai_manager') {
+            $manager  = new \local_ai_manager\manager('questiongeneration');
+            $response = $manager->perform_request($prompt, 'local_jomot', $contextid);
+            if ($response->get_code() !== 200) {
+                throw new \moodle_exception(
+                    'err_retrievingfeedback',
+                    'local_jomot',
+                    '',
+                    'code=' . $response->get_code() . ' ' . $response->get_errormessage(),
+                    $response->get_debuginfo()
+                );
+            }
+            return $response->get_content();
+        }
+
+        $action = new \core_ai\aiactions\generate_text(
+            contextid: $contextid,
+            userid: $USER->id,
+            prompttext: $prompt
+        );
+        $response = \core\di::get(\core_ai\manager::class)->process_action($action);
+        if (!$response->get_success()) {
+            throw new \moodle_exception(
+                'err_retrievingfeedback',
+                'local_jomot',
+                '',
+                $response->get_errormessage(),
+                'code=' . $response->get_errorcode() . ' error=' . $response->get_error()
+            );
+        }
+        $generated = $response->get_response_data()['generatedcontent'] ?? null;
+        if ($generated === null || $generated === '') {
+            throw new \moodle_exception('err_retrievingfeedback_checkconfig', 'local_jomot');
+        }
+
+        return $generated;
     }
 
     /**
@@ -408,7 +476,9 @@ class create_quiz extends external_api {
     /**
      * Writes pre-parsed question data to the quiz. Called only after quiz creation succeeds.
      *
-     * @param list<array{questiontext: string, aiprompt: string}> $questions
+     * @param int   $quizid
+     * @param string $quizname
+     * @param array $questions List of ['questiontext' => string, 'aiprompt' => string].
      * @param float $questionmark Maximum mark for each question.
      */
     private static function add_questions_to_quiz(
@@ -433,12 +503,13 @@ class create_quiz extends external_api {
      * adhoc task fails loudly (and retries) rather than silently creating one
      * corrupt question.
      *
+     * @param string $response Raw AI response text.
      * @return list<array{questiontext: string, aiprompt: string}>
      * @throws \moodle_exception If the response cannot be parsed into question objects.
      */
     private static function parse_ai_questions_response(string $response): array {
-        $json = preg_replace('/^```(?:json)?\s*/m', '', $response);
-        $json = preg_replace('/\s*```\s*$/m', '', $json);
+        $json = preg_replace('/^\x60{3}(?:json)?\s*/m', '', $response);
+        $json = preg_replace('/\s*\x60{3}\s*$/m', '', $json);
         $json = trim($json);
 
         $data = json_decode($json, true);
@@ -564,6 +635,9 @@ class create_quiz extends external_api {
     /**
      * Returns an availability JSON string that restricts the activity to a single
      * user identified by email address and hides it from everyone else.
+     *
+     * @param string $email
+     * @return string
      */
     private static function build_user_availability(string $email): string {
         return json_encode([

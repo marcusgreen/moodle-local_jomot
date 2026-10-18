@@ -41,7 +41,6 @@ use core_external\external_value;
  * references and section records are created the same way the editing UI would.
  */
 class add_question extends external_api {
-
     /**
      * Describes the parameters accepted by execute().
      */
@@ -185,8 +184,10 @@ class add_question extends external_api {
         if ($params['minwordlimit'] < 0 || $params['maxwordlimit'] < 0) {
             throw new \invalid_parameter_exception('Word limits must not be negative');
         }
-        if ($params['minwordlimit'] > 0 && $params['maxwordlimit'] > 0
-                && $params['maxwordlimit'] < $params['minwordlimit']) {
+        if (
+            $params['minwordlimit'] > 0 && $params['maxwordlimit'] > 0
+                && $params['maxwordlimit'] < $params['minwordlimit']
+        ) {
             throw new \invalid_parameter_exception('maxwordlimit must not be less than minwordlimit');
         }
 

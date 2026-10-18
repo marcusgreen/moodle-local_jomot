@@ -34,7 +34,6 @@ use context_course;
  * @covers \local_jomot\external\add_question
  */
 final class add_question_test extends advanced_testcase {
-
     /** @var \stdClass Course used across tests. */
     private \stdClass $course;
 
@@ -87,7 +86,7 @@ final class add_question_test extends advanced_testcase {
         $this->assertSame('aitext', $question->qtype);
         $this->assertSame('My AI Question', $question->name);
 
-        // aitext-specific options exist.
+        // The aitext-specific options exist.
         $options = $DB->get_record('qtype_aitext', ['questionid' => $result['questionid']], '*', MUST_EXIST);
         $this->assertSame(
             'Evaluate whether the student correctly described evaporation, condensation, and precipitation.',

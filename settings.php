@@ -44,6 +44,19 @@ if ($hassiteconfig) {
         $defaultprompt
     ));
 
+    // The core AI subsystem is always available; local_ai_manager only when installed.
+    $backends = ['core_ai_subsystem' => get_string('backend_coreai', 'local_jomot')];
+    if (core_plugin_manager::instance()->get_plugin_info('local_ai_manager')) {
+        $backends['local_ai_manager'] = get_string('backend_localaimanager', 'local_jomot');
+    }
+    $settings->add(new admin_setting_configselect(
+        'local_jomot/backend',
+        get_string('backend', 'local_jomot'),
+        get_string('backend_desc', 'local_jomot'),
+        'core_ai_subsystem',
+        $backends
+    ));
+
     $settings->add(new admin_setting_configtext(
         'local_jomot/templatetag',
         get_string('templatetag', 'local_jomot'),

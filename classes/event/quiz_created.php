@@ -28,27 +28,49 @@ namespace local_jomot\event;
  * Fired after local_jomot successfully creates a quiz in a course.
  */
 class quiz_created extends \core\event\base {
-
+    /**
+     * Sets the event's basic properties.
+     */
     protected function init() {
         $this->data['objecttable'] = 'quiz';
         $this->data['crud'] = 'c';
         $this->data['edulevel'] = self::LEVEL_TEACHING;
     }
 
+    /**
+     * Returns the localised event name.
+     *
+     * @return string
+     */
     public static function get_name() {
         return get_string('event_quiz_created', 'local_jomot');
     }
 
+    /**
+     * Returns a non-localised description of the event.
+     *
+     * @return string
+     */
     public function get_description() {
         return "The user with id '{$this->userid}' created quiz with id '{$this->objectid}'" .
                " (cmid {$this->other['cmid']}) named '{$this->other['name']}'" .
                " in course '{$this->courseid}'.";
     }
 
+    /**
+     * Returns the URL of the created quiz.
+     *
+     * @return \moodle_url
+     */
     public function get_url() {
         return new \moodle_url('/mod/quiz/view.php', ['id' => $this->other['cmid']]);
     }
 
+    /**
+     * Checks that the required 'other' data is present.
+     *
+     * @throws \coding_exception
+     */
     protected function validate_data() {
         parent::validate_data();
         if (empty($this->other['cmid'])) {

@@ -24,6 +24,9 @@
 
 namespace local_jomot;
 
+/**
+ * Plugin-wide constants.
+ */
 class constants {
     /** Default number of questions to generate per submission. */
     const DEFAULT_NUMQUESTIONS = 5;
