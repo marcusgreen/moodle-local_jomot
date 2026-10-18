@@ -28,20 +28,18 @@ if ($hassiteconfig) {
     $settings = new admin_settingpage('local_jomot', get_string('pluginname', 'local_jomot'));
     $ADMIN->add('localplugins', $settings);
 
-    $defaultprompt = 'The following is a student\'s assignment submission. '
-        . 'Generate {numquestions} questions that test whether the student genuinely understands what they wrote. '
-        . 'Each question should ask the student to explain, elaborate on, or demonstrate understanding of a specific '
-        . 'concept, claim, or argument from their submission.' . "\n\n"
-        . 'Respond with a JSON array of {numquestions} objects. Each object must have exactly two keys: '
-        . '"questiontext" (the question to show the student, referencing specific parts of their submission) and '
-        . '"aiprompt" (grading instructions for the AI evaluator describing what a correct answer should demonstrate, '
-        . 'grounded in what the submission actually said).';
-
     $settings->add(new admin_setting_configtextarea(
         'local_jomot/default_ai_prompt',
         get_string('default_ai_prompt', 'local_jomot'),
         get_string('default_ai_prompt_desc', 'local_jomot'),
-        $defaultprompt
+        \local_jomot\external\create_quiz::DEFAULT_AI_PROMPT
+    ));
+
+    $settings->add(new admin_setting_configtextarea(
+        'local_jomot/json_prompt',
+        get_string('json_prompt', 'local_jomot'),
+        get_string('json_prompt_desc', 'local_jomot'),
+        \local_jomot\external\create_quiz::DEFAULT_JSON_PROMPT
     ));
 
     // The core AI subsystem is always available; local_ai_manager only when installed.

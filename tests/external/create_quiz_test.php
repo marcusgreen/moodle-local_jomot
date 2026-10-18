@@ -457,12 +457,55 @@ final class create_quiz_test extends advanced_testcase {
         $method = new \ReflectionMethod(create_quiz::class, 'build_ai_prompt');
         $prompt = $method->invoke(null, 'Student essay text', 3, 'Focus on the methodology section.');
 
-        $this->assertStringStartsWith('Generate 3 questions.', $prompt);
+        $this->assertStringStartsWith("=== TASK ===\nGenerate 3 questions.", $prompt);
         $extrapos      = strpos($prompt, 'Focus on the methodology section.');
         $submissionpos = strpos($prompt, '<<<SUBMISSION_START>>>');
+        $formatpos     = strpos($prompt, '=== OUTPUT FORMAT ===');
         $this->assertNotFalse($extrapos, 'additional prompt must be included');
         $this->assertNotFalse($submissionpos);
+        $this->assertNotFalse($formatpos);
         $this->assertLessThan($submissionpos, $extrapos, 'additional prompt must precede the submission');
+        $this->assertLessThan($formatpos, $submissionpos, 'output format must follow the submission');
+    }
+
+    /**
+     * The output format is always appended, even when the admin prompt omits it.
+     */
+    public function test_build_ai_prompt_always_appends_output_format(): void {
+        set_config('default_ai_prompt', 'Generate {numquestions} questions.', 'local_jomot');
+
+        $method = new \ReflectionMethod(create_quiz::class, 'build_ai_prompt');
+        $prompt = $method->invoke(null, 'Student essay text', 4, '');
+
+        $this->assertStringContainsString('Return only a JSON array of exactly 4 objects', $prompt);
+        $this->assertStringEndsWith('[{"questiontext":"string","aiprompt":"string"}]', $prompt);
+    }
+
+    /**
+     * A custom output-format setting replaces the default and supports {numquestions}.
+     */
+    public function test_build_ai_prompt_uses_custom_json_prompt(): void {
+        set_config('default_ai_prompt', 'Generate {numquestions} questions.', 'local_jomot');
+        set_config('json_prompt', 'Reply with {numquestions} JSON objects.', 'local_jomot');
+
+        $method = new \ReflectionMethod(create_quiz::class, 'build_ai_prompt');
+        $prompt = $method->invoke(null, 'Student essay text', 3, '');
+
+        $this->assertStringEndsWith("=== OUTPUT FORMAT ===\nReply with 3 JSON objects.", $prompt);
+        $this->assertStringNotContainsString('Return only a JSON array', $prompt);
+    }
+
+    /**
+     * With no admin prompt configured, the class default is used.
+     */
+    public function test_build_ai_prompt_falls_back_to_default(): void {
+        set_config('default_ai_prompt', '', 'local_jomot');
+
+        $method = new \ReflectionMethod(create_quiz::class, 'build_ai_prompt');
+        $prompt = $method->invoke(null, 'Student essay text', 2, '');
+
+        $this->assertStringContainsString('Generate 2 questions about the student submission', $prompt);
+        $this->assertStringNotContainsString('{numquestions}', $prompt);
     }
 
     /**
@@ -474,7 +517,7 @@ final class create_quiz_test extends advanced_testcase {
         $method = new \ReflectionMethod(create_quiz::class, 'build_ai_prompt');
         $prompt = $method->invoke(null, 'Student essay text', 2, '');
 
-        $this->assertStringNotContainsString('Additional instructions from the teacher', $prompt);
+        $this->assertStringNotContainsString('ADDITIONAL INSTRUCTIONS FROM THE TEACHER', $prompt);
         $this->assertStringContainsString('Student essay text', $prompt);
     }
 
