@@ -1,4 +1,6 @@
 # Just One More Thing
+[![Moodle Plugin CI](https://github.com/marcusgreen/moodle-local_jomot/actions/workflows/moodle-ci.yml/badge.svg)](https://github.com/marcusgreen/moodle-local_jomot/actions/workflows/moodle-ci.yml) [![GitHub Release](https://img.shields.io/github/release/marcusgreen/moodle-local_jomot.svg)](https://github.com/marcusgreen/moodle-local_jomot/releases)
+[![Moodle Support](https://img.shields.io/badge/Moodle-%3E%3D%205.0-blue)](https://github.com/marcusgreen/moodle-local_jomot/actions)
 
 ## Benefit
 
