@@ -87,21 +87,36 @@ When editing the assignment you can also control:
   maximum 50). Questions are shown one per page.
 - **Quiz visible to students** — make the quiz visible immediately, or leave it hidden
   (the default) so you can review it before releasing.
-- **Additional AI prompt** — extra text appended to the default prompt, to steer how the AI
-  generates questions and feedback for this assignment.
+- **Additional AI prompt** — extra instructions added after the default prompt, to steer how the
+  AI generates questions for this assignment.
 - **Template quiz** — pick an existing quiz in the course whose settings (time limit, attempts,
   grade method, review options, etc.) are copied into each generated quiz. Any questions in the
   template quiz are also copied into each generated quiz, keeping their order and marks; the
   AI-generated questions for the student's submission are added after them. Per-student naming,
   visibility and access are still controlled by the plugin. Choose *Default settings (no
   template)* to use the plugin defaults.
+- **Marks per question** — the maximum mark for each AI-generated question (default 1). Questions
+  copied from a template quiz keep the marks they have in the template.
+- **Maximum quiz grade** — the maximum grade for the generated quiz; the total of the question
+  marks is scaled to it. Leave empty to use the template quiz grade, or 10 when there is no
+  template.
 
 ## Admin settings
 
 Under **Site administration → Plugins → Local plugins → Just One More Thing**:
 
-- **Default AI prompt** — the base prompt sent to the AI when generating questions. The
-  `{numquestions}` placeholder is replaced with the configured number of questions.
+- **Default AI prompt** — the task description sent to the AI when generating questions: what
+  kind of questions to write and what the grading instructions for each should contain.
+- **Output format prompt** — instructions telling the AI to reply with JSON. They are added at the
+  end of the prompt, after the student's submission. Change them with care: the reply must still be
+  a JSON array of objects with `questiontext` and `aiprompt` keys, or no questions can be created.
+
+Both prompts accept the `{numquestions}` placeholder, which is replaced with the assignment's
+number of questions. Leave a prompt empty to use the built-in default. Edit them to experiment
+with the wording sent to the AI.
+
+- **AI backend** — which AI system generates the questions: Moodle's core AI subsystem (default),
+  or the AI manager (`local_ai_manager`) when it is installed.
 - **Template tag** — when set, only quizzes whose activity carries that tag appear in the
   **Template quiz** selector. Leave empty to list every quiz in the course.
 

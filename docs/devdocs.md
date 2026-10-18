@@ -29,10 +29,11 @@ under cron, never during the student's submission request.
 | `qtype_aitext` | Question type of generated questions | `add_question::add_to_quiz()` |
 | `local_ai_manager` (optional) | Alternative AI backend, chosen in the plugin settings | `create_quiz::perform_ai_request()` |
 | `tool_aiconnect` | Default model name when none is given for a question | `add_question::add_to_quiz()` |
-| Site document converter | Converting office documents to text (via `local_ai_content`) | See [`../fileconversion_shim.md`](../fileconversion_shim.md) |
+| Site document converter | Converting office documents to text (via `local_ai_content`) | `cli/unoconv-shim` works around a broken system `unoconv` |
 
-Only `local_ai_content` is declared in `version.php` `$plugin->dependencies`; the
-others are assumed to be installed.
+`local_ai_content` and `qtype_aitext` are declared in `version.php`
+`$plugin->dependencies`; `tool_aiconnect` is assumed to be installed, and the
+optional components are detected at runtime.
 
 ## File map
 
@@ -46,7 +47,7 @@ local/jomot/
 │   ├── external/create_quiz.php    # Web service + create() used by the task; AI call, template copy
 │   ├── external/add_question.php   # Web service + add_to_quiz(); creates aitext questions
 │   └── task/create_quiz_adhoc.php  # Adhoc task: extract → create quiz
-├── cli/unoconv-shim                # Replacement for broken unoconv binary (see fileconversion_shim.md)
+├── cli/unoconv-shim                # Replacement for a unoconv binary broken by newer LibreOffice
 ├── db/
 │   ├── access.php                  # local/jomot:createquiz
 │   ├── events.php                  # Observer registration
@@ -55,7 +56,7 @@ local/jomot/
 │   └── upgrade.php
 ├── lang/en/local_jomot.php
 ├── lib.php                         # Assignment form hooks, template quiz lookup
-├── settings.php                    # Default AI prompt, template tag
+├── settings.php                    # AI prompts, AI backend, template tag
 ├── index.php                       # Placeholder page (login + empty page)
 └── tests/                          # PHPUnit + Behat
 ```
@@ -65,7 +66,8 @@ local/jomot/
 ```
 Teacher saves assignment settings
   └─ lib.php: local_jomot_coursemodule_edit_post_actions()
-       └─ upsert local_jomot_assign_config (enable_quiz, numquestions, quizvisible, prompt, templatequiz)
+       └─ upsert local_jomot_assign_config (enable_quiz, numquestions, quizvisible, prompt, templatequiz,
+                                             questionmark, quizgrade)
 
 Student submits assignment
   └─ \mod_assign\event\assessable_submitted
@@ -73,7 +75,7 @@ Student submits assignment
             ├─ config missing or enable_quiz = 0 → return
             └─ queue create_quiz_adhoc with custom data:
                courseid, userid, assignmentname, contextid, submissionid,
-               numquestions, templatequiz, quizvisible, prompt
+               numquestions, templatequiz, quizvisible, prompt, questionmark, quizgrade
 
 Cron
   └─ create_quiz_adhoc::execute()
@@ -100,14 +102,16 @@ Moodle calls these legacy callbacks for every course-module form:
 - **`local_jomot_coursemodule_standard_elements()`** — returns early unless the
   module is `assign`. Adds a *Just One More Thing* header with:
   `local_jomot_enable_quiz` (checkbox), `local_jomot_numquestions` (int),
-  `local_jomot_quizvisible` (checkbox), `local_jomot_prompt` (textarea) and
-  `local_jomot_templatequiz` (select). All but the first are hidden via `hideIf`
+  `local_jomot_quizvisible` (checkbox), `local_jomot_prompt` (textarea),
+  `local_jomot_templatequiz` (select), `local_jomot_questionmark` (text, default 1)
+  and `local_jomot_quizgrade` (text, empty by default). All but the first are hidden via `hideIf`
   until the feature is enabled. When editing (`?update=<cmid>`), saved values are
   loaded from `local_jomot_assign_config` and applied with `setDefault()`.
 - **`local_jomot_coursemodule_edit_post_actions()`** — runs after the assignment
   is saved, so `$data->instance` is the assign id. Clamps `numquestions` to
   `1..MAX_NUMQUESTIONS`, cleans the prompt with `PARAM_TEXT`, and upserts the
-  config row.
+  config row. An empty `quizgrade` is stored as `NULL`, meaning "use the template
+  quiz grade, or the plugin default".
 - **`local_jomot_get_template_quizzes($courseid)`** — options for the template
   select. Lists all non-deleted quizzes in the course, or, when the admin
   `templatetag` setting is set, only quizzes whose course module carries that tag
@@ -119,7 +123,7 @@ Registered in `db/events.php` for `\mod_assign\event\assessable_submitted` with
 `internal => false`, so it only runs after the submission transaction commits.
 It does no slow work — it reads the config row and queues a
 `create_quiz_adhoc` task carrying the ids needed later. The config values
-(`numquestions`, `templatequiz`, `quizvisible`, `prompt`) are snapshotted into the task at
+(`numquestions`, `templatequiz`, `quizvisible`, `prompt`, `questionmark`, `quizgrade`) are snapshotted into the task at
 submission time; changing the assignment settings afterwards does not affect
 tasks already queued.
 
@@ -136,6 +140,8 @@ runs the extractor, logs any skipped files with `mtrace()`, then calls
 | `useremail` | the student's email — drives naming and access restriction |
 | `visible` | `quizvisible` from task data |
 | `prompt` | the assignment's additional AI prompt |
+| `questionmark` | maximum mark for each AI-generated question |
+| `grade` | `quizgrade` from task data, only when the teacher set one |
 
 Any exception fails the task; Moodle's task runner retries it with backoff.
 
@@ -211,7 +217,8 @@ Key steps inside `create()`:
    - slots without a ready question version are skipped.
    Template questions take the first slots.
 7. **AI questions** are appended by `add_questions_to_quiz()`, named
-   `<quiz name> Q1`, `Q2`, … via `add_question::add_to_quiz()`.
+   `<quiz name> Q1`, `Q2`, … via `add_question::add_to_quiz()`, each with
+   `defaultmark` set to the `questionmark` override.
 8. **Event.** `\local_jomot\event\quiz_created` is triggered in the course context
    with `other = ['cmid', 'name']`.
 
@@ -220,7 +227,7 @@ Plugin defaults set by `build_moduleinfo()` (unless a template overrides them):
 | Setting | Default |
 |---|---|
 | `visible` | `0` (hidden) |
-| `grade` | `10.0` |
+| `grade` | `10.0` (or the assignment's *Maximum quiz grade*) |
 | `attempts` | `0` (unlimited) |
 | `questionsperpage` | `1` |
 | `preferredbehaviour` | `deferredfeedback` |
@@ -232,17 +239,26 @@ Plugin defaults set by `build_moduleinfo()` (unless a template overrides them):
 
 ### AI prompt and response
 
-`build_ai_prompt()` builds the prompt in three parts:
+`build_ai_prompt()` builds the prompt from labelled sections, in the same style
+as `qtype_aitext`:
 
-1. the `local_jomot/default_ai_prompt` admin setting (with a hard-coded
-   fallback), with `{numquestions}` replaced;
-2. the assignment's *Additional AI prompt*, if any, under
-   `Additional instructions from the teacher:`. It travels from
+1. `=== TASK ===` — the `local_jomot/default_ai_prompt` admin setting, falling
+   back to `create_quiz::DEFAULT_AI_PROMPT` when empty;
+2. `=== ADDITIONAL INSTRUCTIONS FROM THE TEACHER ===` — the assignment's
+   *Additional AI prompt*, if any. It travels from
    `local_jomot_assign_config.prompt` through the task's `prompt` custom data to
    the `prompt` override of `create_quiz::create()`;
-3. the submission, wrapped in `<<<SUBMISSION_START>>>` / `<<<SUBMISSION_END>>>`
-   with an instruction that it is untrusted content. This is a basic
-   prompt-injection guard; keep the submission last and do not remove it.
+3. `=== STUDENT SUBMISSION ===` — the submission, wrapped in
+   `<<<SUBMISSION_START>>>` / `<<<SUBMISSION_END>>>` with an instruction that it
+   is untrusted content. This is a basic prompt-injection guard; do not remove it;
+4. `=== OUTPUT FORMAT ===` — the `local_jomot/json_prompt` admin setting, falling
+   back to `create_quiz::DEFAULT_JSON_PROMPT`. It comes last so the model reads
+   the format rules after a possibly long submission.
+
+`{numquestions}` is replaced in both admin prompts. The generated `aiprompt`
+becomes the question's grading instructions, which `qtype_aitext` wraps in its own
+template with scoring and JSON rules, so the default task prompt tells the model
+not to include marks or format instructions in it.
 
 The request goes through `\tool_ai_bridge\ai_bridge` in the course context, using
 the `local_jomot/backend` setting: `core_ai_subsystem` (default) or `local_ai_manager`
@@ -288,6 +304,8 @@ One row per assignment (unique key on `assignmentid`).
 | `quizvisible` | int(1) | 0 = hidden (default) |
 | `prompt` | text | additional per-assignment AI instructions |
 | `templatequiz` | int(10) | `quiz.id` of the template, 0 = none |
+| `questionmark` | number(12,7) | maximum mark per AI-generated question, default 1 |
+| `quizgrade` | number(10,5), nullable | maximum quiz grade; `NULL` = template grade or plugin default |
 | `timecreated` / `timemodified` | int(10) | Unix timestamps |
 
 Schema changes need both `db/install.xml` (fresh installs) and a step in
@@ -317,7 +335,9 @@ request. Use `create()` / `add_to_quiz()` instead.
 
 | Setting | Purpose |
 |---|---|
-| `local_jomot/default_ai_prompt` | Base prompt; must ask for a JSON array of `{questiontext, aiprompt}` objects. `{numquestions}` is substituted. |
+| `local_jomot/default_ai_prompt` | Task prompt. `{numquestions}` is substituted; empty uses `create_quiz::DEFAULT_AI_PROMPT`. |
+| `local_jomot/json_prompt` | Output-format prompt, appended last. Must still produce a JSON array of `{questiontext, aiprompt}` objects for the parser. `{numquestions}` is substituted; empty uses `create_quiz::DEFAULT_JSON_PROMPT`. |
+| `local_jomot/backend` | `core_ai_subsystem` (default) or `local_ai_manager` (offered only when installed). |
 | `local_jomot/templatetag` | When set, only quizzes with this tag appear in the template selector. |
 
 ## Behaviour to be aware of
@@ -346,7 +366,7 @@ Tests live in `tests/`:
 | `external/create_quiz_test.php` | Web service, availability restriction, adhoc task, submission → quiz end-to-end, `quizvisible`, prompt building and the additional prompt reaching the task |
 | `external/create_quiz_template_test.php` | Copying template questions |
 | `external/add_question_test.php` | aitext question creation and validation |
-| `behat/admin_settings.feature` | Admin can view and save the default AI prompt |
+| `behat/admin_settings.feature` | Admin can view and save the task and output-format prompts |
 
 Run each test file from the Moodle root, for example:
 

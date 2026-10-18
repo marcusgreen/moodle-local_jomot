@@ -16,7 +16,6 @@
 #   Site admin > Plugins > Document converters > Unoconv > Path to unoconv
 #   to the absolute path of this script. No other Moodle change required.
 #
-# See local/jomot/fileconversion_issues.md for the full background.
 
 set -u
 
