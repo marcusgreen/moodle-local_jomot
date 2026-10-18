@@ -66,4 +66,4 @@ $string['templatequiz_help'] = 'Select an existing quiz in this course whose set
 $string['templatequiz_label'] = 'Template quiz';
 $string['templatequiz_none'] = 'Default settings (no template)';
 $string['templatetag'] = 'Template tag';
-$string['templatetag_desc'] = 'If set, only quizzes tagged with this tag (the activity Tags field) are used as templates for generated quizzes. Leave empty to use the default settings.';
+$string['templatetag_desc'] = 'If set, only quizzes tagged with this tag (the activity Tags field) are used as templates for generated quizzes. A plugin-specific name such as <code>jomot-template</code> avoids clashing with tags used for other purposes. Leave empty to list every quiz in the course.';
