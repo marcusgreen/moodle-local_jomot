@@ -301,6 +301,10 @@ final class create_quiz_test extends advanced_testcase {
     public function test_submission_creates_quiz_restricted_to_submitter_email(): void {
         global $DB;
 
+        // The observer is external ('internal' => false), so it only runs once no DB
+        // transaction is open; on Postgres each test otherwise runs inside one.
+        $this->preventResetByRollback();
+
         $generator = $this->getDataGenerator();
 
         // Student who will submit the assignment.
@@ -480,6 +484,10 @@ final class create_quiz_test extends advanced_testcase {
      */
     public function test_observer_passes_additional_prompt_to_task(): void {
         global $DB;
+
+        // The observer is external ('internal' => false), so it only runs once no DB
+        // transaction is open; on Postgres each test otherwise runs inside one.
+        $this->preventResetByRollback();
 
         $generator = $this->getDataGenerator();
         $student   = $generator->create_user();
