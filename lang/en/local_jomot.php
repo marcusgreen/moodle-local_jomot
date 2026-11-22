@@ -53,6 +53,7 @@ $string['questionmark_label'] = 'Marks per question';
 $string['quizgrade'] = 'Maximum quiz grade';
 $string['quizgrade_help'] = 'Maximum grade for the generated quiz. The total of the question marks is scaled to this grade. Leave empty to use the template quiz grade, or 10 when there is no template.';
 $string['quizgrade_label'] = 'Maximum quiz grade';
+$string['quiznameforstudent'] = '{$a->name} ({$a->student})';
 $string['quizvisible'] = 'Quiz visible to students';
 $string['quizvisible_desc'] = 'Make generated quiz visible to students immediately';
 $string['quizvisible_help'] = 'When enabled, the generated quiz will be visible to students as soon as it is created. Disable to review the quiz before releasing it.';

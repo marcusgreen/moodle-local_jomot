@@ -191,7 +191,9 @@ Two entry points share the same logic:
 Key steps inside `create()`:
 
 1. **Naming.** If `useremail` matches a non-deleted user, the quiz name becomes
-   `strtolower(firstname) . '-' . strtolower(lastname) . '_' . <name>`.
+   `<name> (<fullname>)` via the `quiznameforstudent` lang string, e.g.
+   `Essay (Adam Smith)`. If the user's full name is empty, the name is left
+   unchanged.
 2. **AI questions first.** `fetch_ai_questions()` runs before any DB writes, so a
    failed or unparseable AI response throws without leaving an empty quiz behind.
    Skipped entirely when the submission text is empty (the quiz is then created
