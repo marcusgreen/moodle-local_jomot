@@ -311,6 +311,7 @@ class create_quiz extends external_api {
             'preferredbehaviour' => 'deferredfeedback',
             'visible'            => 0,
             'sectionnum'         => 0,
+            'beforemod'          => null,
             'useremail'          => '',
         ], $overrides);
 
@@ -600,6 +601,8 @@ class create_quiz extends external_api {
         $moduleinfo->module              = $module->id;
         $moduleinfo->course              = $course->id;
         $moduleinfo->section             = $params['sectionnum'];
+        // Course module id to insert the quiz before (null = end of section).
+        $moduleinfo->beforemod           = $params['beforemod'] ?? null;
         $moduleinfo->visible             = $params['visible'];
         $moduleinfo->visibleoncoursepage = 1;
         $moduleinfo->groupmode           = 0;
