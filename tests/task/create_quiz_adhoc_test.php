@@ -85,6 +85,42 @@ final class create_quiz_adhoc_test extends advanced_testcase {
     }
 
     /**
+     * Moves a course module to the end of a section.
+     *
+     * cmactions::move_end_section() only exists from Moodle 5.2, which deprecates
+     * moveto_module(), so use whichever this Moodle version provides.
+     *
+     * @param int $cmid
+     * @param int $sectionnum
+     */
+    private function move_cm_to_section_end(int $cmid, int $sectionnum): void {
+        $section = get_fast_modinfo($this->course->id)->get_section_info($sectionnum);
+        $cmactions = \core_courseformat\formatactions::cm($this->course);
+        if (method_exists($cmactions, 'move_end_section')) {
+            $cmactions->move_end_section($cmid, (int) $section->id);
+        } else {
+            moveto_module(get_coursemodule_from_id('', $cmid, 0, false, MUST_EXIST), $section);
+        }
+    }
+
+    /**
+     * Deletes a course module.
+     *
+     * cmactions::delete() only exists from Moodle 5.2, which deprecates
+     * course_delete_module(), so use whichever this Moodle version provides.
+     *
+     * @param int $cmid
+     */
+    private function delete_cm(int $cmid): void {
+        $cmactions = \core_courseformat\formatactions::cm($this->course);
+        if (method_exists($cmactions, 'delete')) {
+            $cmactions->delete($cmid);
+        } else {
+            course_delete_module($cmid);
+        }
+    }
+
+    /**
      * The quiz goes in the assignment's section, directly after it.
      */
     public function test_quiz_placed_directly_after_assignment(): void {
@@ -139,8 +175,7 @@ final class create_quiz_adhoc_test extends advanced_testcase {
         $assign = $generator->create_module('assign', ['course' => $this->course->id, 'section' => 1]);
         $contextid = (int) \context_module::instance($assign->cmid)->id;
 
-        $section3 = get_fast_modinfo($this->course->id)->get_section_info(3);
-        \core_courseformat\formatactions::cm($this->course)->move_end_section((int) $assign->cmid, (int) $section3->id);
+        $this->move_cm_to_section_end((int) $assign->cmid, 3);
 
         $quizcm = $this->run_task($contextid);
 
@@ -163,7 +198,7 @@ final class create_quiz_adhoc_test extends advanced_testcase {
         $generator = $this->getDataGenerator();
         $assign = $generator->create_module('assign', ['course' => $this->course->id, 'section' => 2]);
         $contextid = (int) \context_module::instance($assign->cmid)->id;
-        \core_courseformat\formatactions::cm($this->course)->delete((int) $assign->cmid);
+        $this->delete_cm((int) $assign->cmid);
 
         $quizcm = $this->run_task($contextid);
 
