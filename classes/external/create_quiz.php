@@ -316,8 +316,14 @@ class create_quiz extends external_api {
 
         if (!empty($params['useremail'])) {
             $user = $DB->get_record('user', ['email' => $params['useremail'], 'deleted' => 0]);
-            if ($user) {
-                $params['name'] = strtolower($user->firstname) . '-' . strtolower($user->lastname) . '_' . $params['name'];
+            $student = $user ? trim(fullname($user)) : '';
+            if ($student !== '') {
+                // Assignment name first, separated by a space, so simple global
+                // search (which matches word beginnings) finds it by either name.
+                $params['name'] = get_string('quiznameforstudent', 'local_jomot', [
+                    'name'    => $params['name'],
+                    'student' => $student,
+                ]);
             }
         }
 

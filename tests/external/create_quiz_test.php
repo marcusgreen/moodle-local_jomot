@@ -237,8 +237,44 @@ final class create_quiz_test extends advanced_testcase {
         $this->assertSame('isequalto', $condition['op']);
         $this->assertSame($student->email, $condition['v']);
 
-        // Name is prefixed once with the student's name.
-        $this->assertSame('jo-student_Assignment One', $result['name']);
+        // Name is suffixed once with the student's name.
+        $this->assertSame('Assignment One (Jo Student)', $result['name']);
+    }
+
+    /**
+     * Multibyte student names are kept intact in the quiz name.
+     */
+    public function test_create_quiz_name_multibyte_student(): void {
+        $student = $this->getDataGenerator()->create_user([
+            'firstname' => 'Ádám',
+            'lastname'  => 'Šmíd',
+            'email'     => 'adam.smid@example.com',
+        ]);
+
+        $result = create_quiz::create($this->course->id, 'Essay', ['useremail' => $student->email]);
+
+        $this->assertSame('Essay (Ádám Šmíd)', $result['name']);
+    }
+
+    /**
+     * A student with no first or last name gets the assignment name only,
+     * but the quiz is still restricted to them.
+     */
+    public function test_create_quiz_name_falls_back_when_fullname_empty(): void {
+        global $DB;
+
+        $student = $this->getDataGenerator()->create_user([
+            'firstname' => '',
+            'lastname'  => '',
+            'email'     => 'noname@example.com',
+        ]);
+
+        $result = create_quiz::create($this->course->id, 'Essay', ['useremail' => $student->email]);
+
+        $this->assertSame('Essay', $result['name']);
+        $cm = $DB->get_record('course_modules', ['id' => $result['cmid']], '*', MUST_EXIST);
+        $tree = json_decode($cm->availability, true);
+        $this->assertSame($student->email, $tree['c'][0]['v']);
     }
 
     /**
@@ -282,7 +318,7 @@ final class create_quiz_test extends advanced_testcase {
         $task->execute();
         ob_end_clean();
 
-        $quiz = $DB->get_record('quiz', ['name' => 'sam-jones_Essay'], '*', MUST_EXIST);
+        $quiz = $DB->get_record('quiz', ['name' => 'Essay (Sam Jones)'], '*', MUST_EXIST);
         $cm   = get_coursemodule_from_instance('quiz', $quiz->id, $this->course->id, false, MUST_EXIST);
 
         $tree = json_decode($cm->availability, true);
@@ -376,7 +412,7 @@ final class create_quiz_test extends advanced_testcase {
         ob_end_clean();
 
         // The quiz is named after the student and locked to their email.
-        $quiz = $DB->get_record('quiz', ['name' => 'pat-lee_' . $cm->name], '*', MUST_EXIST);
+        $quiz = $DB->get_record('quiz', ['name' => $cm->name . ' (Pat Lee)'], '*', MUST_EXIST);
         $quizcm = get_coursemodule_from_instance('quiz', $quiz->id, $this->course->id, false, MUST_EXIST);
 
         $this->assertNotEmpty($quizcm->availability, 'generated quiz must carry an access restriction');
@@ -423,7 +459,7 @@ final class create_quiz_test extends advanced_testcase {
         $task->execute();
         ob_end_clean();
 
-        $quiz = $DB->get_record('quiz', ['name' => 'kim-roe_Visible'], '*', MUST_EXIST);
+        $quiz = $DB->get_record('quiz', ['name' => 'Visible (Kim Roe)'], '*', MUST_EXIST);
         $cm   = get_coursemodule_from_instance('quiz', $quiz->id, $this->course->id, false, MUST_EXIST);
         $this->assertEquals(1, $cm->visible, 'quizvisible=1 must create a visible quiz');
 
@@ -443,7 +479,7 @@ final class create_quiz_test extends advanced_testcase {
         $task->execute();
         ob_end_clean();
 
-        $quiz = $DB->get_record('quiz', ['name' => 'kim-roe_Hidden'], '*', MUST_EXIST);
+        $quiz = $DB->get_record('quiz', ['name' => 'Hidden (Kim Roe)'], '*', MUST_EXIST);
         $cm   = get_coursemodule_from_instance('quiz', $quiz->id, $this->course->id, false, MUST_EXIST);
         $this->assertEquals(0, $cm->visible, 'quizvisible=0 must create a hidden quiz');
     }
