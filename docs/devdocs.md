@@ -142,6 +142,17 @@ runs the extractor, logs any skipped files with `mtrace()`, then calls
 | `prompt` | the assignment's additional AI prompt |
 | `questionmark` | maximum mark for each AI-generated question |
 | `grade` | `quizgrade` from task data, only when the teacher set one |
+| `sectionnum`, `beforemod` | from `placement_after_assignment()` — see below |
+
+**Placement.** `placement_after_assignment()` resolves the assignment's course
+module from `contextid` when the task runs (not when it is queued, so the quiz
+follows an assignment moved in the meantime). The quiz goes in the same section
+or subsection, inserted before the activity that follows the assignment, the
+way a duplicated activity is placed. Each new quiz therefore sits directly below
+the assignment, so the newest is first. If the assignment is missing or being
+deleted, no placement overrides are passed and the quiz goes to section 0.
+If the assignment's section is hidden, students cannot reach the quiz until the
+section is shown, whatever `quizvisible` says.
 
 Any exception fails the task; Moodle's task runner retries it with backoff.
 
@@ -366,6 +377,7 @@ Tests live in `tests/`:
 | `external/create_quiz_test.php` | Web service, availability restriction, adhoc task, submission → quiz end-to-end, `quizvisible`, prompt building and the additional prompt reaching the task |
 | `external/create_quiz_template_test.php` | Copying template questions |
 | `external/add_question_test.php` | aitext question creation and validation |
+| `task/create_quiz_adhoc_test.php` | Quiz placement after the assignment: same section, subsection, end of section, moved assignment, fallback to section 0 |
 | `behat/admin_settings.feature` | Admin can view and save the task and output-format prompts |
 
 Run each test file from the Moodle root, for example:

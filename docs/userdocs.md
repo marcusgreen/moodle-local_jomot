@@ -8,6 +8,7 @@ Each quiz:
 
 - Reflects the individual student's own submission, not a generic template
 - Appears automatically after the next cron run — no manual step needed
+- Is placed directly below the assignment it comes from, in the same section (newest quiz first)
 - Is named `firstname-lastname_assignmentname` after the student who submitted
 - Can only be seen and taken by the student it is named after (hidden from everyone else)
 

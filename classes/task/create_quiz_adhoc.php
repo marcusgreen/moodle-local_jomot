@@ -30,6 +30,7 @@ namespace local_jomot\task;
  * Custom data keys:
  *   - courseid (int): the course to create the quiz in
  *   - userid   (int): the student whose full name becomes the quiz name
+ *   - contextid (int): the assignment module context; the quiz is placed directly after it
  */
 class create_quiz_adhoc extends \core\task\adhoc_task {
     /**
@@ -61,7 +62,7 @@ class create_quiz_adhoc extends \core\task\adhoc_task {
             mtrace("local_jomot: WARNING file '{$skipped['filename']}' excluded ({$skipped['reason']}).");
         }
 
-        $overrides = [
+        $overrides = self::placement_after_assignment((int) $data->courseid, (int) $data->contextid) + [
             'questionsperpage' => \local_jomot\constants::DEFAULT_QUESTIONSPERPAGE,
             'templatequiz'     => (int) ($data->templatequiz ?? 0),
             'useremail'        => $user->email,
@@ -84,5 +85,41 @@ class create_quiz_adhoc extends \core\task\adhoc_task {
         );
 
         mtrace("local_jomot: quiz created successfully");
+    }
+
+    /**
+     * Works out where to put the quiz so it sits directly after its assignment,
+     * in the same section (or subsection), as a duplicated activity would.
+     *
+     * Resolved at run time rather than when the task is queued, so the quiz
+     * follows the assignment if a teacher moved it in the meantime. Returns no
+     * overrides, leaving the quiz in the General section, when the assignment
+     * can no longer be found.
+     *
+     * @param int $courseid
+     * @param int $contextid The assignment's module context id.
+     * @return array{sectionnum?: int, beforemod?: int|null}
+     */
+    private static function placement_after_assignment(int $courseid, int $contextid): array {
+        $context = $contextid ? \context::instance_by_id($contextid, IGNORE_MISSING) : false;
+        if (!$context || $context->contextlevel != CONTEXT_MODULE) {
+            return [];
+        }
+
+        $modinfo = get_fast_modinfo($courseid);
+        $cm = $modinfo->cms[$context->instanceid] ?? null;
+        if (!$cm || $cm->deletioninprogress) {
+            return [];
+        }
+
+        // Insert before whatever follows the assignment; null appends to the section.
+        $sequence = array_values($modinfo->sections[$cm->sectionnum] ?? []);
+        $position = array_search($cm->id, $sequence);
+        $next = $position === false ? null : ($sequence[$position + 1] ?? null);
+
+        return [
+            'sectionnum' => (int) $cm->sectionnum,
+            'beforemod'  => $next === null ? null : (int) $next,
+        ];
     }
 }
